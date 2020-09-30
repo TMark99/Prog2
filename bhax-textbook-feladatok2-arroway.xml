@@ -6,36 +6,281 @@
         </keywordset>
     </info>
 
-    <section>
-        <title>A BPP algoritmus Java megvalósítása</title>
+	<section>
+        <title>OO szemlélet</title>
         <para>
+	Írjunk olyan OO, leforduló Java és C++ kódcsipetet, amely megsérti a Liskov elvet! Mutassunk rá a
+megoldásra: jobb OO tervezés.
         </para>
+	<para>
+            A következő programcsipet a JDK beéített metódusa amely megtalálható 
+            a java.util.Random forrásban a nextGaussian néven.
+        </para>
+
+        <programlisting language="java"><![CDATA[
+            public class NextGuassian {
+		
+                private double nextNextGaussian;
+                private boolean haveNextNextGaussian = false;
+
+                public double nextGaussian() {
+                if (haveNextNextGaussian) {
+                    haveNextNextGaussian = false;
+                    return nextNextGaussian;
+                } else {
+                    double n1, n2, v1, v2, s;
+                    do {
+                        n1 = Math.random();	/// nextDouble()
+                        n2 = Math.random();
+                        
+                        v1 = 2 * n1 - 1;   // between -1.0 and 1.0
+                        v2 = 2 * n2 - 1;   // between -1.0 and 1.0
+                        s = v1 * v1 + v2 * v2;
+                    } while (s >= 1 || s == 0);
+                    double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s)/s);
+                    nextNextGaussian = v2 * multiplier;
+                    haveNextNextGaussian = true;
+                    return v1 * multiplier;
+                    }
+                }
+            }
+        ]]></programlisting>
+	<para>
+            A következő kód részlet a PolarGen, amit már elöző félévből is ismerhetünk.
+        </para>
+	
+	 <programlisting language="java"><![CDATA[
+           public class PolarGenerator
+{
+    boolean nincsTarolt = true;
+    double tarolt;
+    
+    public PolarGenerator()
+    {
+        nincsTarolt = true;
+    }
+    
+    public double kovetkezo() 
+    {
+        if(nincsTarolt)
+        {
+            double u1, u2, v1, v2, w;
+            do{
+                u1 = Math.random();
+                u2 = Math.random();
+                v1 = 2* u1 -1;
+                v2 = 2* u2 -1;
+                w = v1*v1 + v2*v2;
+            } while (w>1);
+            
+            double r = Math.sqrt((-2 * Math.log(w) / w));
+            tarolt = r * v2;
+            nincsTarolt = !nincsTarolt;
+            return r * v1;
+        }
+        else
+        {
+            nincsTarolt = !nincsTarolt;
+            return tarolt;
+        }
+    }
+public static void main(String[] args)
+    {
+        PolarGenerator g = new PolarGenerator();
+        for (int i = 0; i < 10; ++i)
+        {
+            System.out.println(g.kovetkezo());
+        }
+    }  
+}
+        ]]></programlisting>
+	<para>
+            Ha alaposan megfigyeljük a kér kódot, akkor látható, hogy lényegében csak a változok nevei változtak meg. Tehát levonhatjuk azt a következtetést, hogy a az OpenJDK, Oracle JDK-ban a Sun által adott OO szervezés ua., mint a mi kódunk.
+        </para>
+	<para>
+            Beszéljünk kicsit a programról és hogy mit csinál. Nem nagyon fogom részletezni, mivel a Welch fejezetbe már le van írva.
+            A kovetkezo() nevű metódus matematikai számítás alapján hoz létre egy új számokat. Az if-ben megnézzük, hogy
+            van-e már létrehozott érték, illetve ha nincs, tovább lépünk a ciklusba. Ez létrehoz 2 "véletlen" számot a random() függvénnyel. 
+            Ha a szám nagyobb mint 1, a while() ciklusban matematikai számításokat végzünk, majd értéket ad a tarolt nevű változónak. Ezt 	      követően nincsTarolt valtozó logikai értékét megváltoztatja. A returnnel pedig visszaadja a létrehozott értéket.
+            Ha már volt generált szám, akkor a nincsTarolt valtozó logikai értékét megváltoztatja és azt a számot adja vissza.
+        </para>
+	<para>
+	Lássuk úgyan ezt a kódot C++ nyelven:
+        </para>
+	<programlisting language="c++"><![CDATA[
+	#include <iostream>
+#include <math.h>
+#include <pthread.h>
+#include <ctime>
+
+
+class PolarGen
+{
+public:
+  PolarGen()
+  {
+    nincsTarolt = true;
+    std::srand (std::time(NULL));
+  }
+  ~PolarGen()
+  {
+  }
+  double kovetkezo();
+private:
+  bool nincsTarolt;
+  double tarolt;
+};
+double PolarGen::kovetkezo ()
+{
+  if (nincsTarolt)
+  {
+    double u1, u2, v1, v2, w;
+        do
+      {
+        u1= std::rand() / (RAND_MAX +1.0);
+        u2= std::rand() / (RAND_MAX +1.0);
+        v1=2*u1-1;
+        v2=2*u1-1;
+        w=v1*v1+v2*v2;
+           }
+    while (w>1);
+    double r =std::sqrt ((-2 * std::log(w)) /w);
+    tarolt=r*v2;
+    nincsTarolt =!nincsTarolt;
+    return r* v1;
+   }
+   else
+   {
+    nincsTarolt =!nincsTarolt;
+    return tarolt;
+   }
+}
+int main (int argc, char **argv)
+{
+    PolarGen pg;
+    for (int i= 0; i<10;i++)
+      std::cout<<pg.kovetkezo ()<< std::endl;
+    return 0;
+}
+	]]></programlisting>
+</section>  
+    
+
+<section>
+        <title>„Gagyi”</title>
         <para>
-            Megoldás videó:
+	Az ismert formális3
+„while (x &lt;= t &amp;&amp; x >= t &amp;&amp; t != x);” tesztkérdéstípusra adj a szokásosnál
+(miszerint x, t az egyik esetben az objektum által hordozott érték, a másikban meg az objektum
+referenciája) „mélyebb” választ, írj Java példaprogramot mely egyszer végtelen ciklus, más x, t
+értékekkel meg nem! A példát építsd a JDK Integer.java forrására4
+, hogy a 128-nál inkluzív objektum
+példányokat poolozza!
         </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>
+	<para>
+	A feladatban szerepeltetett feltétel azért érdekes, mivel az integerben a -128 127 intervallum előre tárolva van és a program
+	az eltárolt memória címeket hasonlítja össze. Abban az esetben, ha az intervallumon kivül eső értéket veszünk fel, példa kép a -129-t
+	mind két változóban, akkor a két memóriacím különbözik, ezt követően őedig, mivel a feltétel teljesül belép a végtelen ciklusba a 		program.
+	</para>
     </section>        
 
     <section>
-        <title>Java osztályok a Pi-ben</title>
+        <title>Yoda</title>
         <para>
-            Az előző feladat kódját fejleszd tovább: vizsgáld, hogy Vannak-e Java osztályok a Pi hexadecimális kifejtésében!
+            Írjunk olyan Java programot, ami java.lang.NullPointerEx-el leáll, ha nem követjük a Yoda conditions-t!
         </para>
         <para>
-            Megoldás videó:
+            A Yoda conditions nevezhető egy programozási "nyelv jásrásnak". A lényege, hogy a feltétel két részét megfordítjuk. Az az
+	az összehasonlítandó értéket a megszokással ellentétben, nem bal oldalra, hanem jobb oldalra tesszük.
+        </para>
+	<programlisting language="java"><![CDATA[
+	if ($value == 42) /*e helyet*/
+	if (42 == $value) /*ezt írjuk*/
+	]]></programlisting>
+        <para>
+            A nevét a jelenség onnan kapta, hogy a Star Warsból jól ismert karakter Yoda, törve beszélte az angol nyelvet.                
+        </para>
+	<programlisting language="java"><![CDATA[
+	public class yoda {
+		public static void main (String[]args)
+		{
+			String myString = null;
+			/*if (myString.equals("foobar"))
+				System.out.println("Yoda nem ért");*/
+			if (!("foobar".equals(myString)))
+				System.out.println("Yoda érti");
+		}
+	}
+	]]></programlisting>
+        <para>
+            A fenti programrészben elértük, hogy a kommentált rész java.lang.NullpointerEx hibával leálljon, mivel a NULL-t nem tudjuk hasonlítni a karakter sorhoz.
+        </para>
+    </section>   
+<section>
+        <title>EPAM: Objektum példányosítás programozási mintákkal</title>
+        <para>
+            Hozz példát mindegyik “creational design pattern”-re és mutasd be mikor érdemes használni őket!
         </para>
         <para>
-            Megoldás forrása:                
+            A létrehozási minták a példányosítás folyamatát ábrázolja. Obijektumok létrehozására valóak és, hogy egyszerűsítsék kódot illetve 
+	a tervezést.
         </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>
-    </section>        
-        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+	<para>
+	Gyártó metódus programtervezési minta
+	</para>
+	<para>
+	Ezzel a mintával a kódban található számos egyforma példányosító utosítás kiváltható. A függvények neve általában a Create, Make vagy 
+	Do szóval kezdödnek és a nevükben megadott osztály egy pédányát adják vissza. Az ősosztályban elhelyezett gyártásimetódus írja le a 
+	gyártás algoritmusát, a gyermek osztály pedig eldönti mit kell legyártani.
+	</para>
+	<para>
+	
+	</para>
+	<para>
+	A inkelt példában az "auto" osztály egy abstact osztály lesz, ennek a mintjára adunk meg három másik osztályt, amely ezt kibővíti. 
+	A "Getautomarka" osztály létre fogja hozni az obijektumot a megadott információ szerint.
+	</para>
+	<para>
+	Absztrakt gyár programtervezési minta
+	</para>
+	<para>
+	Ez a programozási minta lehetőséget nyújt arra, hogy a közös témához kapcsolodó gyártó metódusokat egyságbe zárjuk, anélkül, hogy specifikálnánk azok konkrét osztályiat. Szétválasztja egymástól objektumok egy csoportjának implementációját azok általános használatától és objektum összetételre hagyatkozik. Ennek a mintának a használata, lehetővé teszi egy rendszerben a konkrét típus implementációk kicserélését anélkül, hogy az őket használó kódot módosítanánk.
+	</para>
+	<para>
+	
+	</para>
+	<para>
+	A linkelt példában, elsőnek létrehozunk egy "bank" interfészt, majd konkrét osztályokat, minden banknak. Ezt követöen egy "kölcsön"
+	abstarct osztályt és konkrét osztályokat a kölcsön tipusoknak. Majd létrehozzuk az absztract gyárunkat, ami hivatkozni fog a bank és a kölcsöngyár osztályra.
+	</para>
+	<para>
+	Építő programtervezési minta
+	</para>
+	<para>
+	Ez a minta a gyártó és az absztrakt gyár metodustól abban különbözik, hogy alternatívát nyújt a teleszkópos konstruktor anti-mintára.
+	Az anti-minta akkor jelentkezik, amikor a konstruktor paraméter-kombinációinka a száma növekszik és a konstruktor exponenciális listáját okozza. Az építő minta az építőt használja, ami egy másik obijektum és minden egyes paramétert lépésről lépésre kap meg, majd egyben adja azt vissza. Ezt a programtervezési mintát használhatjuk lapos adatoknál. (HTML, SQL)
+	</para>
+	<para>
+	
+	</para>
+	<para>
+	Prototípus programtervezési minta
+	</para>
+	<para>
+	A prototípus programozási minta lényege, a klónozás, az erefeti obijektummal megegyző új obijektum létrehozása. Ehhez az egyszerű értékadás nem elegendő, úgyan is azzal csak másolás történik. A klónozásnak két típusa van a segély és a mély klonózás. A sekély klónozásban a hivatkozott obijektumokat is másoljuk, mint elemi tipusú tulajdonságait. A mély klónozásnál az osztály által hivatkozott objektumokat is klónozzuk.
+	</para>
+	<para>
+	
+	</para>
+	<para>
+	Egyke programtervezési minta
+	</para>
+	<para>
+	Ebben a programozási mintában egy obijektumra korlátozzuk, a létrehozható példányok számát. Az egykének nem lehet publikus konstruktora, mivel ez esetben több példányt is létre lehetne hozni. De ha nincs konstruktor, akkor nem hozható létre a megoldást az osztályszintű metódusok jelentik. Ezzeket akkor is lehet használni ha nincs példány. Szóval az egykének van osztály szintű metódusa, ami minden hívojának ugyan azt adja vissza. A létrehozáshoz pedig privát konstruktort
+	</para>
+	<para>
+	
+	</para>
+    </section> 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 </chapter>                

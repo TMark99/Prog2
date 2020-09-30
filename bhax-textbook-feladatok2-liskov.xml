@@ -1,0 +1,339 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Liskov!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+
+	<section>
+        <title>Liskov helyettesítés sértése</title>
+        <para>
+	Írjunk olyan OO, leforduló Java és C++ kódcsipetet, amely megsérti a Liskov elvet! Mutassunk rá a
+megoldásra: jobb OO tervezés.
+        </para>
+	<para>
+	Liskov helyetesítési elve a következő: Ha S altípusa T-nek, akkor minden olyan helyen ahol T-t felhasználjuk S-t is minden gond nélkül behelyettesíthetjük anélkül, hogy a programrész tulajdonságai megváltoznának.
+	</para>
+	<para>
+	Ez azt jelenti, hogy az S altípus mindenhova beilleszthető ahova a T ős, illetve minden tulajdonsága úgyan az. Ez nagyon jól hangzik mert rengeteget könnyít számunkra, mikor hasonló osztályokat szeretnénk létrehozni. Azonban ezt az elvet meg lehet sérteni, és a feladatban meg is fogjuk, a következő képen: olyan osztály csinálunk, ami felesleges utasítást örök az őstől. Mind a két programban (Java és C++) úgyan azt csináljuk, ráveszük a Pingvint, hogy repüljön, ami lehetetlen.
+	</para>
+    	<programlisting language="java"><![CDATA[
+	class Madar{
+	public void repul()
+	{
+		System.out.println(super.getClass().getSimpleName() + " repül");
+	};
+}
+
+class Sas extends Madar{};
+class Golya extends Madar{}; 
+class Pingvin extends Madar{};
+
+public class liskov
+{
+	public static void main(String[] args)
+	{
+		Madar madar = new Madar();
+		Sas sas = new Sas();
+		Golya golya = new Golya();
+		Pingvin pingvin = new Pingvin();
+		sas.repul();
+		golya.repul();
+		pingvin.repul();
+	}
+}
+	]]></programlisting>
+	<para>
+	Látható, hogy a programunkban a Pingvin osztály örökölte a Madar osztály repul függvényét, ami számára teljesen felesleges. Ezzel sértve Liskov helyetesítési elvét. A következő program úgyen ezt csinálja, csak C++ nyelven írodot.
+	</para>
+	<programlisting language="c++"><![CDATA[
+	#include <iostream>
+
+using namespace std;
+class Madar{
+	public:
+		void repul(char nev[]){
+		cout<<nev<<" repul\n";
+			}
+};
+
+class Golya : public Madar
+{
+	public:	
+	char nev[7]="Golya";
+};
+class Sas : public Madar
+{
+	public:
+	char nev[4]="Sas";
+};
+class Pingvin : public Madar
+{
+	public:
+	char nev[8]="Pingvin";
+};
+int main()
+{
+	Golya golya;
+	Sas sas;
+	Pingvin pingvin;
+	golya.repul(golya.nev);	
+	sas.repul(sas.nev);
+	pingvin.repul(pingvin.nev);		
+	return 0;
+}
+	]]></programlisting>
+</section>  
+    
+
+<section>
+        <title>Szülő-gyerek</title>
+        <para>
+	Írjunk Szülő-gyerek Java és C++ osztálydefiníciót, amelyben demonstrálni tudjuk, hogy az ősön
+keresztül csak az ős üzenetei küldhetőek!
+        </para>
+	<para>
+	A következő feladatban egy programot láthatunk, amelyben a láthatjuk, hogy az alosztály képes használni az ős függvényeit, de ez fordítva nem igaz. Lássuk is a Java kódot:
+	</para>
+	<programlisting language="java"><![CDATA[
+	class szulo{
+	public void write(){
+		System.out.println("Szülő");
+	}
+}
+class gyerek extends szulo{
+	public void kiir() {
+		System.out.println("Gyerek");
+	}
+}
+public class szulogyerek {
+	public static void main(String[] args) {
+		szulo egy = new szulo();
+		gyerek ketto = new gyerek();
+		egy.write();
+		ketto.kiir();
+		ketto.write();
+	}
+}
+	]]></programlisting>
+	<para>
+	A program részletben látható, hogy a gyerek tudja használni a szulo write függvényét. Ellenben ha ezt fordítva szeretnénk eljátszani, az az egy szulo osztályú obijektumot kérnénk meg arra, hogy a gyerek osztály kiir függvényét használja, a programunk nem fordulna, kompilálási hibába ütköznénk. Most pedig úgyan ez a program C++ nyelven:
+	</para>
+	<programlisting language="java"><![CDATA[
+#include <iostream>
+
+using namespace std;
+
+class Szulo{
+	public: void ir(){cout<<"szulo";}
+}; 
+
+class gyerek : public Szulo
+{
+	public: void kiir(){
+		cout<<"Gyerek";
+}
+};
+
+
+int main()
+{
+	Szulo apa;
+	gyerek fia;
+	apa.ir();
+	fia.ir();
+	fia.kiir();
+	//apa.kiir();
+	return 0;
+}
+	]]></programlisting>
+    </section>        
+
+    <section>
+        <title>EPAM: Liskov féle helyettesíthetőség elve, öröklődés</title>
+        <para>
+            Adott az alábbi osztály hierarchia.
+        </para>
+	<programlisting language="java"><![CDATA[
+	class Vehicle, class Car extends Vehicle, class Supercar extends
+Car
+	]]></programlisting>
+	<para>
+            Mindegyik osztály konstruktorában történik egy kiíratás, valamint a Vehicle osztályban szereplő
+start() metódus mindegyik alosztályban felül van definiálva.
+Mi történik ezen kódok futtatása esetén, és miért?
+        </para>
+        <programlisting language="java"><![CDATA[
+	Vehicle firstVehicle = new Supercar();
+firstVehicle.start();
+System.out.println(firstVehicle instanceof Car);
+Car secondVehicle = (Car) firstVehicle;
+secondVehicle.start();
+System.out.println(secondVehicle instanceof Supercar);
+Supercar thirdVehicle = new Vehicle();
+thirdVehicle.start();
+	]]></programlisting>
+	<para>
+	Elsőnek is lássuk a teljes kodót:
+        </para>
+	<programlisting language="java"><![CDATA[
+	class Vehicle{
+	public Vehicle() {
+		System.out.println("Vehicle");
+	};
+	public void start() {
+		System.out.println("first");
+	}
+};
+class Car extends Vehicle{
+	public Car() {
+		System.out.println("Car");
+	}
+	@Override
+	public void start() {
+		System.out.println("second");
+	}
+};
+class Supercar extends Car{
+	public Supercar()
+	{
+		System.out.println("Supercar");
+	}
+	@Override
+	public void start() {
+		System.out.println("third");
+	}
+};
+public class liskov {
+
+	public static void main(String[] args) {
+		Vehicle firstVehicle = new Supercar();
+		firstVehicle.start();
+		System.out.println(firstVehicle instanceof Car);
+		Car secondVehicle = (Car) firstVehicle;
+		secondVehicle.start();
+		System.out.println(secondVehicle instanceof Supercar);
+		//Supercar thirdVehicle = new Vehicle();
+		//thirdVehicle.start();
+	}
+
+}
+	]]></programlisting>
+	<para>
+	A kérdésünk az volt, hogy mi történik a kód futatását követően. Erre a válasz, hogy semmi, mivel nem fordul le a program. Az ok pedig, úgyan az, mint az elöző feladatnál. Azt szeretnénk, hogy egy ős osztály a leszármazott osztály egyik függvényét használja. Ahogy látható  a fenti kódban, az utolsó két sor kommentárba van, ezzel elérve, hogy leforduljon a program.
+        </para>
+    </section>   
+<section>
+        <title>EPAM: Interfész, Osztály, Absztrak Osztály</title>
+        <para>
+            Mi a különbség Java-ban a Class, Abstract Class és az Interface között? Egy tetszőleges példával /
+példa kódon keresztül mutasd be őket és hogy mikor melyik koncepciót célszerű használni.
+        </para>
+	<para>
+            Osztály :
+        </para>
+	<para>
+            Egy osztály a következő képen hozzunk létre: class &lt; osztály neve &gt;. Az osztályban deklarálhatunk változokat illetve függvényeket, az utobbikat kötelesek vagyunk kifejteni (az az leírni, hogy mit fognak csinálni.) Az osztálynak van konstruktora is, ami a nevére hivatkozik.
+        </para>
+	<para>
+            Egy egyszerű példa program egyszerű osztállyal:
+        </para>
+        <programlisting language="java"><![CDATA[
+	class car2{
+	public void brand() {
+		System.out.println("Audi A" + 4);
+	}
+	public void color() {
+		System.out.println("black");
+	}
+}
+
+public class normalclass {
+
+	public static void main(String[] args) {
+	car2 car = new car2();
+	car.brand();
+	car.color();
+	}
+
+}
+	]]></programlisting>
+	<para>
+            Interface :
+        </para>
+	<para>
+            Egy interfészt a következő képen hozzunk létre: interface &lt; interface neve &gt;. Az interfészben deklarálhatunk változokat illetve függvényeket, az utobbikat azonban, az osztállyal ellentétben nem fejtjük ki. A függvény kifejtése majd csak az osztályon belül fog megtörténi. Az osztály úgy örökli az interfész tulajdonságait, hogy a létrehozásakor utána írjuk, hogy "implements &lt; interface neve &gt;".
+Egy osztály több intefésztől is örökölhet utasításokat, ez esetben vesszővel válasszuk el az interfészek neveit az osztály deklarálásánál.
+        </para>
+	<para>
+            Egy egyszerű példa program interfésszel:
+        </para>
+        <programlisting language="java"><![CDATA[
+	
+
+interface car{ //ez egy séma
+	public void getbrand();
+	public void getcolor();
+}
+
+class newcar implements car{ //osztalyt csinálunk a séma alapján
+	public void getbrand(){
+		System.out.println("Audi A" + 4);
+	}
+	public void getcolor() {
+		System.out.println("Black");
+	}
+}
+
+public class inetface {
+
+	public static void main(String[] args) {
+		newcar car= new newcar(); //példányosítás
+		car.getbrand();
+		car.getcolor();
+	}
+
+}
+	]]></programlisting>
+	<para>
+            Absztract osztály :
+        </para>
+	<para>
+            Egy absztrakt osztályt a következő képen hozzunk létre: abstract &lt; osztály neve &gt;. Az absztrakt osztályban deklarálhatunk változokat illetve függvényeket. A függvényekkel azonban azt teszünk, amit akarunk, az az vagy kifejtjük, vagy nem ez a programozon áll, azonban amennyiben nem fejtjük ki, akkor elé kell írni az abstract kulcs szót. Az osztály úgy örökli az absztrakt osztály tulajdonságait, hogy a létrehozásakor utána írjuk, hogy "extends &lt; absztrakt osztály neve &gt;".
+Egy osztály csak és csak is egy absztrakt osztálytól örökölhet.
+        </para>
+	<para>
+            Egy egyszerű példa program absztrak osztállyal:
+        </para>
+        <programlisting language="java"><![CDATA[
+	
+
+
+abstract class car1{ //ez egy séma
+	public abstract void getbrand();
+	public void getcolor()
+	{
+		System.out.println("Black");
+	}
+}
+
+class newcar1 extends car1{ //osztalyt csinálunk a séma alapján
+	public void getbrand(){
+		System.out.println("Audi A" + 4);
+	}
+}
+
+public class abstract1{
+
+	public static void main(String[] args) {
+		newcar1 car= new newcar1(); //példányosítás
+		car.getbrand();
+		car.getcolor();
+	}
+
+}
+	]]></programlisting>
+    </section> 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+</chapter>                
