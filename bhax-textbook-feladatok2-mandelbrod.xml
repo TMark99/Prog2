@@ -1,0 +1,363 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Mandelbrot!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+
+	<section>
+        <title>Forward engineering UML osztálydiagram</title>
+        <para>
+	UML-ben tervezzünk osztályokat és generáljunk belőle forrást!
+        </para>
+	<para>
+            A feladatban a GenMyCode nevezetü weboldalt fogom használni, ahol meg lehet építeni az UML fát, majd legenerálni vele az osztály fájlokat.
+        </para>
+	<para>
+            Jelenleg egy egyszerű példát fogok létrehozni, amiben van két osztály, az egyikben a Bankszámla  adatokat, illetve a pénzfelvétel lesz, a másikban pedig bankszámlát hozzunk létre. Az UML a következő képen nézz ki:
+        </para>
+
+	<mediaobject>
+        	<imageobject condition="printf">
+        		<imagedata fileref="img/uml.png" format="PNG" scale="30"/>
+        	</imageobject>
+        </mediaobject>
+
+	<para>
+            Az UML megszerkeztése utaán a következő feladatunk legenerálni az osztályokat. Ha a fentebb említett GenMyCode nevezetű online felületet használjuk, akkor ez számunkra nagyon egyszerű. Bal oldalt menüpontot váltunk a Generators fülre kattintva. Itt a két megjelent mappából a következő útvonalon haladunk: Sample generators/UML/Java és én itt az uml2java generátort használtam. Erre katintva, egy új fül nyilik meg a munka felületen, egy hosszú kód amit, ha futattunk, akkor legenerálja és le is tölti az osztályokat.
+        </para>
+	<mediaobject>
+        	<imageobject condition="printf">
+        		<imagedata fileref="img/generalt.png" format="PNG" scale="30"/>
+        	</imageobject>
+        </mediaobject>
+	<para>
+	A fenti képen látható az egyik osztály, amit generáltunk. Észrevehető a rengetek megjegyzés mellett, hogy a változok neve tényleg az, amit megadtunk az UML ábrán. Innen a következő feladatunk definiálni a függvényeket és egy futatható programot írni. Nem szeretném nagyon részletezni a kódot, a lényege, hogy létrehozz egy bankszámlafiókot egy előre beépített összeggel rajta, és erről lehet készpénzt lekérni.
+        </para>
+
+        <programlisting language="java"><![CDATA[
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+//Bankszamla.java
+public class Bankszamla {
+
+	public String Szamlaszam;
+	public int Osszeg = 60000;
+
+	public Bankszamla() {
+		super();
+	}
+
+	public void Egyenleg(int parameter) {
+		System.out.println("Az on egyenlege:" + parameter);
+	}
+
+	public int Lekeres() {
+		System.out.println("Írja be a kivenni kivánt összeget.");
+		String levon;
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			levon = br.readLine();
+			int levonas = Integer.parseInt(levon);
+			if (levonas < 0)
+				System.out.println("Érvénytelen összeg");
+			else if (levonas > Osszeg)
+				System.out.println("Nem áll rendelkezésre elég összeg");
+			else {
+				Osszeg = Osszeg - levonas;
+				System.out.println("Sikeres tranzakció");
+			}
+		} catch (IOException e) {
+			System.out.println("Nem adott meg összeget");
+		}
+
+		return 0;
+	}
+
+}
+        ]]></programlisting>
+	 <programlisting language="java"><![CDATA[
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+//Szemely.java
+public class Szemely
+{
+
+	public String Szemelyiszam;
+	
+	public String Nev;
+	
+	public Szemely(){
+		super();
+	}
+	
+	public void AddAccount(Bankszamla parameter) {
+		System.out.println("Adja meg a szemelyi azonosító számát!");
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			Szemelyiszam=br.readLine();
+		} catch (IOException e) {
+			System.out.println("Nem adott meg adatot");
+		}
+		System.out.println("Adja meg a nevét!");
+		try {
+			Nev=br.readLine();
+		} catch (IOException e) {
+			System.out.println("Nem adott meg adatot");
+		}
+		
+	}
+	
+}
+        ]]></programlisting>
+</section>  
+    
+
+<section>
+        <title>EPAM: Neptun tantárgyfelvétel modellezése UML-ben</title>
+        <para>
+	Modellezd le a Neptun rendszer tárgyfelvételéhez szükséges objektumokat UML diagramm
+segítségével.
+        </para>
+	<para>
+	Az elöző feledathoz hasonlóan itt is egy UML táblát fogunk létrehozni, ahol szintén a GenMyCode weboldalt fogom használni, az egyszerűbb kivitelezés céljából. Az UML tábla a következő képen nézz ki:
+	</para>
+	<mediaobject>
+        	<imageobject condition="printf">
+        		<imagedata fileref="img/neptun.png" format="PNG" scale="30"/>
+        	</imageobject>
+        </mediaobject>
+	<para>
+	Induljunk a főosztálytól, ami a Neptun lesz, úgyan is ebben található a main függvény. Ez fogja használni a Targy abstract osztályt, aminek van két változója (ferohely, csoport) és három függvénye(getHely, getRand, eredmeny). Ezt az abstract osztály három tantárgy osztály fogja örökölni (Prog2, Statisztika, Szamitastudomany), amelyeknek van két-két függvénye. A GetTargynev osztály, pedig egy fügvényel rendelkezik, ami visszadja az egyes tantárgyak nevét.
+        </para>
+    </section>        
+
+    <section>
+        <title>EPAM: Neptun tantárgyfelvétel UML diagram implementálása</title>
+        <para>
+            Implementáld le az előző feladatban létrehozott diagrammot egy tetszőleges nyelven.
+        </para>
+        <para>
+            Hogy meggyorsítsük kicsit a feladatunk az elöző feladatban létrehozott UML táblát legenerálom, ahogy az első feladatban leírtam. Így az osztályok létre vannak hozzva és csak a függvényeket kell kifejeteni, illetve a program és felhasználó közötti kommunikációt kell létre hozni.
+        </para>
+	<programlisting language="java"><![CDATA[
+public abstract class Targy
+{
+	protected int ferohely;
+	protected int csoport;
+	
+	public abstract void getHely() ;
+		
+	public abstract int getRand() ;
+	
+	public void eredmeny(String muvelet, String nev) {
+		if (muvelet.equalsIgnoreCase("Felvesz"))
+		{
+			if(getRand() < csoport * ferohely)
+System.out.println("Sikeresen felvetted a " + nev + " tárgyat a " + (int) (Math.random() * (csoport - 1) + 1 ) + ". csoportba.");
+			else
+				System.out.println("A kurzusok beteltek.");
+			for(int i=1; i<=csoport; i++) {
+				System.out.println(i+". csoport: " + ferohely + "/" + ferohely);
+			}
+		}
+		else if(muvelet.equalsIgnoreCase("LEAD")) {
+			System.out.println("Sikeresen leadtad a " + (int) (Math.random() * (csoport - 1) + 1 ) + ". " + nev + " csoport tárgyát.");
+		}
+		else 
+			System.out.println("Nincs ilyen parancs. Próbáld újra.");
+	}
+	
+}
+
+	]]></programlisting>
+	<para>
+            A fenti kód részlet az abstract Targy osztályunk kifejtése. A legenerálásnak köszönhetően, a feladatunk itt csak az "eredmeny" függvény kifejtése. Ez a függvény annyit tesz, hogy kiírja sikeres volt-e a tárgyfelvétel és leadás vagy nem. Ha rossz parancsot gépelünk be, akkor, hiba üzenetet küldünk vissza, ezzel értesítve a felhasználót, hogy olyan utasítást szeretne végrehajtani, amit nem lehetséges.
+        </para>        
+	<para>
+            Mivel a tantárgyakat szimbolizáló osztályok felépítése és müködése úgyan olyan, egyszere ki lehet fejteni mind a hármat. Ahogy a következő kódrészletben látható lesz, a getRand vissza ad egy int számot, ami azt fogja jelképezni, hogy hányan vették fel az adott tantárgyat. Ez a szám véletlen szerű lesz a következő képletet használva: (Math.random() * (felső határérték) - (alsó határérték+1)) + (alsó határérték). A getHely pedig a férőhelyek számát adja vissza. Akkor lássuk a három osztályt:
+        </para>   
+	<programlisting language="java"><![CDATA[
+public class Prog2 extends Targy
+{	
+	public int getRand() {
+		return (int) ((Math.random() * (120-60+1)) + 60);	
+	}
+	
+	public void getHely() {
+		ferohely = 18;
+		csoport = 5;
+	}
+	
+}
+	]]></programlisting>
+	<programlisting language="java"><![CDATA[
+public class Statisztika extends Targy
+{
+	public int getRand() {
+		return (int) ((Math.random() * (100-70+1)) + 70);	
+	}
+	
+	public void getHely() {	
+		ferohely = 22;
+		csoport = 4;
+	}
+	
+}
+
+	]]></programlisting>
+	<programlisting language="java"><![CDATA[
+public class Szamitastudomany extends Targy
+{
+	public int getRand() {
+		return (int) ((Math.random() * (100-70+1)) + 70);	
+	}
+	
+	public void getHely() {
+		
+	}
+	
+}
+
+	]]></programlisting>
+	<para>
+            A GetTagynev osztályban létrehozunk egy listát, amiben eltároljuk az összes tárgyat, majd ezt követően a beolvasot tárgynevet összehasonlítjuk a lista elemekkel. Ha találat van a listában, visszadja a tárgy nevét, ellenkező esetben egy null értéket.
+        </para>
+	<programlisting language="java"><![CDATA[
+import java.util.ArrayList;
+
+public class GetTargynev
+{
+	public Targy getnev(String nev) {
+		ArrayList<String> targyak = new ArrayList<String>();
+		targyak.add("statisztika");
+		targyak.add("prog2");
+		targyak.add("Szamitastudomany");
+		
+		String vantargy = null;
+		
+		for(String i : targyak) {
+			if(nev.equalsIgnoreCase(i))
+				vantargy = nev;
+		}
+		if(vantargy != null) {
+			if(nev.equalsIgnoreCase("PROG2")) {
+				return new Prog2();
+			}
+			else if(nev.equalsIgnoreCase("STATISZTIKA")) {
+				return new Statisztika();
+			}
+			else if(nev.equalsIgnoreCase("SZAMITASTUDOMANY")) {
+				return new Szamitastudomany();
+			} 
+		} else {	
+			System.out.println("Helytelen tárgynév vagy mûvelet.");	
+		}
+		return null;
+	}
+}
+
+	]]></programlisting>
+	<para>
+            A fő osztályban, az az a Neptunban, a program kommunikál a felhasználóval, beolvassa a tárgyat illetve, hogy mit szeretne tenni a tanuló az adott tárgyal (felvenni vagy leadni). Abban az esetben, ha rossz tárgy nevet adunk hiba üzenetet kapunk és újra indul az adatok beolvasása.
+        </para>
+	<programlisting language="java"><![CDATA[
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class Neptun {
+	public static void main(String[] args) throws IOException {
+		GetTargynev targyMelyik = new GetTargynev();
+		BufferedReader targyfelvetel = new BufferedReader(new InputStreamReader(System.in));
+
+		System.out.println("Tárgyfelvétel\n");
+		System.out.println("Ha végeztél ird be az 'exit' kilcsszót.");
+		boolean fut;
+
+		do {
+
+			System.out.println("Ird be egy tárgy nevét ( prog2, statisztak, szamitastudomany ) : ");
+			String targynev;
+			try {
+				targynev = targyfelvetel.readLine();
+				System.out.println("Felvesz vagy Lead?: ");
+				String muvelet = targyfelvetel.readLine();
+				
+				Targy t = (Targy) targyMelyik.getnev(targynev);
+
+				if(t != null)
+				{
+					t.getRand();
+					t.getHely();
+					t.eredmeny(muvelet, targynev);
+				}
+				else
+					System.out.println("Érvénytelen tárgynév");
+				System.out.println(
+						"Ha nem akarsz további mûveleteket végezni\nird be az 'exit' kulcsszót egyébként nyomj entert:");
+				String exit = targyfelvetel.readLine();
+				if (exit.equalsIgnoreCase("EXIT"))
+					fut = false;
+				else
+					fut = true;
+			} catch (IOException e) {
+				System.out.println("Érvénytelen utasítás");
+			}
+			System.out.println(
+					"Ha nem akarsz további mûveleteket végezni\nird be az 'exit' kulcsszót egyébként nyomj entert:");
+			String exit = targyfelvetel.readLine();
+			if (exit.equalsIgnoreCase("EXIT"))
+				fut = false;
+			else
+				fut = true;
+		} while (fut == true);
+
+		System.out.println("A tárgyfelvétel megtörtént.");
+	}
+
+}
+	]]></programlisting>
+    </section>   
+<section>
+        <title>EPAM: OO modellezés</title>
+        <para>
+            Írj egy 1 oldalas esszét arról, hogy OO modellezés során milyen elveket tudsz követni (pl.: SOLID,
+KISS, DRY, YAGNI)
+        </para>
+        <para>
+            Ebben a feladatban az obijektum orientált programozás egyes elveíről olvashatunk. Kezdjük is a SOLID-val.
+        </para>
+	<para>
+            Elsőnek is lássuk, honnan kapta a nevét ez az elv. A SOLID öt tervezési alapelv kezdőbetűiből alkotott mozaik szó. Az öt alap elv Egyetlen felelőség elve (Single Responsibility Principle), Nyílt/zárt elv (Open/Closed Principle), Liskov helyetesítési elve (Liskov substitution Principle), Interfész elválasztási elv (Interface Degregation Principle) illetve a Fűggőség megfordítási elv (Dependency Inversion Principle). Beszéljünk most kicsit ezzekről az elvekről.
+        </para>
+	<para>
+            Egyetlen felelőség elve: Az elv azt mondja, hogy egy osztálynak vagy obijektumnak csak egyetlen egy oka legyen változni. Ez az egyetlen ok azt jelenti, hogy egyetlen feladata lehet csak az obijektumnak. Ha több feladattal rendelkezik, akkor ezzek csatoltá válnak, több oka lesz a változásra, illetve egy felelőségben (okban) történő változás, gátolhatja vagy gyengítheti az osztály képességét a többi feladat végrehajtásában.
+        </para>
+	<para>
+            Nyílt/zárt elv: Az elv szerint az osztály vagy modul nyílt a kiterjeztésre az az kiterjeszthető a viselkedése, de zárt a modosításra, tehát a kiterjesztés nem változtatja meg a forrás vagy bináris kódját. Az elöző fejezetben ilyen volt a gyártó metódus. 
+        </para>
+	<para>
+            Liskov helyetesítési elve: Szerintem ezt az elvet mindenki ismeri, de azért írjuk le mit is jelent. Az elv azt mondja ki, hogy ha S típus a T altípusa, nem változhat meg a program műkődése, ha a programban a T típusu elemeket S típussal helyetesítjük.
+        </para>
+	<para>
+            Interfész elválasztási elv: Az elv szerint nem szabad rákényszeríteni az osztályokat arra, hogy olyan metódusoktól függjenek, amit nem is használnak. Itt meg szeretnék írni két fogalomról, ami ide tartozik. Az első a Vastag interfész (Fat Interface), amit azokra az osztályokra használunk, amelyeknek a szükségesnél több tagfüggvénnyel és baráttal rendelkezik. Az említett elv, ezzek szétválasztásával foglalkozik, az az megpróbálja az osztály több osztályra bontani, azon módon, hogy az új osztályok csak egy-egy klienst szolgáljanak ki. A másik fogalom pedig az Interfész szennyezés (interface pollution), ami azt jelenti, hogy az interfész felesleges metódusokat tartalmaza "szennyezve" van.
+        </para>
+	<para>
+            Fűggőség megfordítási elv: Az elv azt mondja ki, hogy a magas szintű modulok ne fűggjenek az alacsony szintű moduloktól, hanem mindkettő absztrakciótól függjön. Az absztrakció pedig ne fűggjön a részletektől, hanem fordítva legyen. A magas szintű modulok adják az alkalmazás identitását. Erre a megfordításra több ok miatt is szükség volt. Az első, hogy ha nem történt volna a megfordítás, az alacsony szintű modulok megváltoztatása kihatással lett volna a magas szintű modlokra (már pedig ezzek határozák meg a programot). A magas szintű modulokat szeretnék többször újra felhasználni, ha ezzek fűggnek az alacsony szintű moduloktól, a dolgunk jóval nehezebb, úgyan is ez esetben ezzeken keresztül kellene hivatkoznunk.
+        </para>
+	<para>
+            Egy másik modellezési elv a KISS (Keep it simple, stupid), aminek a célja az egyszerűségre való törekvés.
+        </para>
+	<para>
+            Szintén modellezési elv a DRY (Don't Repeat Yourself). Ahogy az angol nevéből következtetni lehet, a lényege, hogy próbáljuk meg nem ismételni magunkat. Itt szeretném megemlíteni az ismétlés pár fajtáját: Kényszerített ismétlés (imposed duplication), a fejlesztő úgy érzi, hogy a környezet megköveteli az ismétlést; Nem szándékos ismétlés (inadvertent duplication) a fejlesztő nem veszi észre, hogy információt dublikál; Türelmetlen ismétlés (impatient duplication) a fejlesztő lustaságból ismétel; Fejlesztők közötti ismétlés (interdeveloper duplication) egy csapatban vagy több különböző csapatban többen dublikálnak egy információt. A DRY ellentétje a WET (We Enjoy Typing).
+        </para>
+	<para>
+            Az utolsó modellezési elv, amiről írni szeretnék a YAGNI (You aren't gonna need it). Az elv lényege, hogy ne deklaráljunk előre semmit, ha nem használjuk fel azonnal.
+        </para>
+    </section> 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+</chapter>                
