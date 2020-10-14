@@ -1,8 +1,6 @@
 <part xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
     <title>Második felvonás</title>
     <partintro>
-        <para> 
-        </para>
 <tip>
               <title>Bátf41 Haxor Stream</title>
               <para>
@@ -14,6 +12,7 @@
             </tip>    
         
     </partintro>
+
     
     <xi:include href="bhax-textbook-feladatok2-arroway.xml">
         <xi:fallback>
@@ -38,5 +37,13 @@
             </para>
         </xi:fallback>
     </xi:include>   
-            
+    
+    <xi:include href="bhax-textbook-feladatok2-chomsky.xml">
+        <xi:fallback>
+            <para>
+                <emphasis>XInclude: bhax-textbook-motto.xml file not found</emphasis>
+            </para>
+        </xi:fallback>
+    </xi:include>       
+	
 </part>  
