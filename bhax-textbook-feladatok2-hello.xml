@@ -1,0 +1,312 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, !</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+
+	<section>
+        <title>OOCWC Boost ASIO hálózatkezelése</title>
+        <para>Mutassunk rá a scanf szerepére és használatára! https://github.com/nbatfai/robocar-
+emulator/blob/master/justine/rcemu/src/carlexer.ll
+</para>
+<para>Feladatunk a scanf szerepének és használatának bemutatása, a megadott forráskódon keresztül. A scanf() egy függvény az std bemenetről olvas be a függvényben megadott paraméterek szerint. Müködése olyan, mint az ismert printf-nek, azonban ez ellentétes irányú, azaz beolvas.
+</para>
+<programlisting language="c"><![CDATA[
+{STAT}{WS}{INT}
+{
+std::sscanf(yytext, "<stat %d", &m_id);
+m_cmd = 1003;
+}
+]]></programlisting>	
+<para>A kódban nem a scanf, hanem a sscanf szerepel, ami formázott stringeket olvas be. A függvény müködése az alábbi, először a szöveget kell megadni, amit vizsgálni akarunk. Ez a példánkban az yytext, ezt követi a "&lt;stat %d", ez lesz a formátum ami alapján kiolvassa a megadott karaktersorozatot. A m_id argumentum, amibe elhelyezük a konvertált értékeket. Álltalánosan az scanf és a sscnaf így néznek ki.
+</para>
+<programlisting language="c"><![CDATA[
+//scanf:
+int scanf(char *formatum, ...)
+//sscanf:
+int sscanf(char *string, char *formatum, argu1, argu2, ...)
+]]></programlisting>
+<para>A konzerviós karakterei a scanf-nek:"d" decimális egész; "i" egész szám; "o" oktális szám; "u" előjel nélküli egész; "x" hexadecimális szám, ezeknek az argumentum típusai az int*. A char* típúsuak pedig: "c" karakter; "s" karaktersorozat. Ez nem az összes konverziós karatkter. További karaktereket találhatunk az interneten. Lehetőségünk van a scanf-en belül szűrésre is.Ezt [ ] belül tudjuk megtenni, például a [ˆabc] azt jelenti, hogy az inputból mindent beolvas kivéve az a,b,c karaktereket. A [a-z0-9] pedig a kisbetűket és számokat nem olvassa be.
+</para>
+</section>
+
+<section>
+	<title>EPAM: XML feldolgozás</title>
+	<para>
+	Adott egy koordinátákat és államokat tartalmazó XML (kb 210ezer sor), ezt az XML-t feldolgozva
+szeretnék létrehozni egy SVG fájlt, melyben minden város megjelenik egy pont formájában az adott
+koordináták alapján (tetszőleges színnel)
+Plusz feladat: A városokat csoportosíthatjuk államok szerint, és minden állam külön színnel jelenjen
+meg a térképen, így látszódni fognak a határok is.
+	</para>
+	<para>Első lépésként a létrehozzuk a városz osztályt az xml alapján. Mivel látható, hogy az xml-ben a városról három információt tárolunk ezért három változonál nincs értelme, hogy többet tároljon. Maga az osztály így nézz ki:</para>
+<programlisting language="java"><![CDATA[
+@Data
+@Builder
+
+public class City {
+
+    private String coordinateX;
+    private String coordinateY;
+    private String state;
+
+}
+]]></programlisting>
+<para>Most pedig nézzük az osztályt, ami elvégzi a feladatot. Elsőnek is deklarálni kell a kimeneti és bemeneti fájlt, majd pedig végre hajtani a feladatot.</para>
+<programlisting language="java"><![CDATA[
+public class ParserSolution {
+
+    private static final String INPUT_FILE = "src/main/resources/input.xml";
+    private static final String OUTPUT_FILE = "src/main/resources/map.svg";
+
+    public void parse() throws XMLStreamException, TransformerException, FileNotFoundException {
+        List<City> cityList = createCityList();
+        Map<String, String> colorsOfStates = createColorsOfStates(cityList);
+        Document document = createDOMSource(cityList, colorsOfStates);
+        TransformerFactory.newInstance().newTransformer().transform(new DOMSource(document), new StreamResult(OUTPUT_FILE));
+    }
+]]></programlisting>
+<para>Haladjunk szépen egyesével a sorokon és vizsgáljunk meg minden metodust.</para>
+<programlisting language="java"><![CDATA[
+private List<City> createCityList() throws XMLStreamException, FileNotFoundException {
+        XMLStreamReader xmlStreamReader = XMLInputFactory.newFactory().createXMLStreamReader(new FileInputStream(INPUT_FILE));
+        List<City> cityList = new LinkedList<>();
+        CityBuilder builder = City.builder();
+	while (xmlStreamReader.hasNext()) {
+            int actual = xmlStreamReader.next();
+            if (isStartElement(actual, "coordinateX", xmlStreamReader)) {
+                builder.coordinateX(xmlStreamReader.getElementText());
+            } else if (isStartElement(actual, "coordinateY", xmlStreamReader)) {
+                builder.coordinateY(xmlStreamReader.getElementText());
+            } else if (isStartElement(actual, "state", xmlStreamReader)) {
+                builder.state(xmlStreamReader.getElementText());
+            } else if (isEndElement(actual, "city", xmlStreamReader)) {
+                cityList.add(builder.build());
+            }
+        }
+        return cityList;
+    }
+]]></programlisting>
+<para>A createCityList az első metódus amivel találkozunk, feladata a városok kiolvasása az xml fájlból. Észrevehetjük, hogy az elözőhétről tanultan nem ArrayListben mentjük a városokat, mivel sok adatot tárolunk, nem tervezett a törés és a keresés. Meghívásra kerül a City osztály buildere majd kiolvasásra kerül az x,y koordináta, az állam és ha elértük a város elem végét, akkor mentésre is kerül.</para>
+	<programlisting language="java"><![CDATA[
+private boolean isStartElement(int actual, String tagName, XMLStreamReader xmlStreamReader) {
+        return actual == XMLStreamReader.START_ELEMENT && tagName.equals(xmlStreamReader.getLocalName());
+    }
+
+    private boolean isEndElement(int actual, String tagName, XMLStreamReader xmlStreamReader) {
+        return actual == XMLStreamReader.END_ELEMENT && tagName.equals(xmlStreamReader.getLocalName());
+    }
+]]></programlisting>
+<para>Az if else részben a fent látható két metodust használjuk, ahogy a nevük is modnják, ezzek csupán megnézik, hogy az adot osztály kezdő vagy végző elem-e.</para>
+<programlisting language="java"><![CDATA[
+private Map<String, String> createColorsOfStates(List<City> cityList) {
+        return cityList.stream()
+                .map(City::getState)
+                .distinct()
+                .collect(Collectors.toMap(hexColor -> hexColor, hexColor -> randomHexColor()));
+    }
+
+private String randomHexColor() {
+        return String.format("#%06X", new Random().nextInt(0x1000000));
+    }
+]]></programlisting>
+<para>A createColorOfStates eljárásban átmapaljük az listánkat, és kiszürjük belőke az államokat, ezt követően azt leegyszerűsítjük, hogy minen állam csak egyszer szerepeljen.Az utolsó lépésben, meghívjuk a randomHexColor metodust, ami egy véletlenszerű színet ad vissza.</para>
+<programlisting language="java"><![CDATA[
+private Document createDOMSource(List<City> cityList, Map<String, String> colorsOfStates) {
+        Document document = SVGDOMImplementation.getDOMImplementation().createDocument(SVGDOMImplementation.SVG_NAMESPACE_URI, "svg", null);
+        Element rootElement = createRootElement(document);
+        cityList.forEach(city -> {
+            Element element = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "circle");
+            element.setAttributeNS(null, "cy", city.getCoordinateX());
+            element.setAttributeNS(null, "cx", city.getCoordinateY());
+            element.setAttributeNS(null, "fill", colorsOfStates.get(city.getState()));
+            element.setAttributeNS(null, "r", "1");
+            rootElement.appendChild(element);
+        });
+        return document;
+    }
+
+    private Element createRootElement(Document document) {
+        Element rootElement = document.getDocumentElement();
+        rootElement.setAttributeNS(null, "width", "800");
+        rootElement.setAttributeNS(null, "height", "600");
+        return rootElement;
+    }
+]]></programlisting>
+<para>Ezt követően létre hozunk egy SVG elemt, ami az eredményünk is lesz. A createRootElement adja meg ennek a méretét. Ezt követően a lista összes városan átmegyünk és a tárolt adatokat a megfeleő atributumba helyezük bele.</para>
+</section>
+
+
+<section>
+	<title>EPAM: ASCII Art</title>
+	<para>ASCII Art in Java! Implementálj egy Java parancssori programot, ami beolvas egy képet és kirajzolja
+azt a parancssorba és / vagy egy szöveges fájlba is ASCII karakterekkel.</para>
+	<programlisting language="java"><![CDATA[
+public class Main {
+
+	public static void main(String[] args) throws IOException {
+		String imageName = args[0];
+		String textFileName = args.length != 2 ? null : args[1];
+		OutputStream outputStream = textFileName == null ? System.out : new FileOutputStream(textFileName);
+		BufferedImage image = ImageIO.read(new File(imageName));
+
+		new AsciiPrinter(outputStream, image).print();
+	}
+
+}
+]]></programlisting>
+<para>A main függvényben elsőnek deklaráljuk a kép nevét, majd a fájl nevét, és ennek a függvényében létrehozzuk a kimeneti fájl nevét. Természetesen ellenörizük, hogy ez a név ne legyen üres. Majd beolvassuk a képet és meghívjúk az ASCIIPrinter-t ami ki fogja rajzoni a beolvasott képet</para>
+
+<programlisting language="java"><![CDATA[
+public class AsciiPrinter {
+
+	private static final char[] ASCII_PIXELS = { '$', '#', '*', ':', '.', ' ' };
+	private static final byte[] NEW_LINE = "\n".getBytes();
+
+	private OutputStream outputStream;
+	private BufferedImage image;
+
+	public AsciiPrinter(OutputStream outputStream, BufferedImage image) {
+		this.outputStream = outputStream;
+		this.image = image;
+	}
+]]></programlisting>
+<para>Kezdetben létrehozzuk a karakterkészletünket és egy változót a sortörésre. Majd deklaráljuk a kimeneti fájlt és  a képet, amit a konstruktoban kapunk meg.</para>
+<programlisting language="java"><![CDATA[
+public void print() throws IOException {
+		for (int i = 0; i < image.getHeight(); i++) {
+			for (int j = 0; j < image.getWidth(); j++) {
+				outputStream.write(getAsciiChar(image.getRGB(j, i)));
+			}
+			outputStream.write(NEW_LINE);
+		}
+	}
+
+	public static char getAsciiChar(int pixel) {
+		return getAsciiCharFromGrayScale(getGreyScale(pixel));
+	}
+
+	public static int getGreyScale(int argb) {
+		int red = (argb >> 16) & 0xff;
+		int green = (argb >> 8) & 0xff;
+		int blue = (argb) & 0xff;
+		return (red + green + blue) / 3;
+	}
+
+	public static char getAsciiCharFromGrayScale(int greyScale) {
+		return ASCII_PIXELS[greyScale / 51];
+	}
+
+]]></programlisting>
+<para>A print metodus bejárja a képet pixelről pixelre, mintha egy mátrix lenne és minden pixelt helyére kiírja a megfelelő karaktert, a fent létrehozott készletből. Azt, hogy melyik karaktert szükséges beszúrni a getAsciiChar metódus mondja meg, ami segítségül hívja a getAsciiCharFromGrayScale-t , aminek paraméterül adja a pixel színének az elszürkített értékét. Ezt az értéket a getGrayScale fogja visszadni. A szürkítéshez az eltolást használjuk, amit nem sűrűn szoktunk a Javaban. A kiírt karakter eldöntése a kapott szürkepont érték 51-vel való osztásával történik meg.</para>
+</section>
+<section>
+	<title>EPAM: Titkos üzenet, száll a gépben!</title>
+	<para>Implementájl egy olyan parancssori alkalmazást, amely a billentyűzetről olvas soronként ASCII
+karakterekből álló sorokat, és a beolvasott szöveget Caesar kódolással egy txt fájlba írja soronként.</para>
+	<para>Mielőtt belekezdünk a feladatba, nézzük meg, mit jelent a Caesar kódolás. A Ceasar kódolás az egyik legegyszerűbb titkosítási módszer, lényege, hogy az ABC-t egy adott értékkel eltolja. Az az ha 3-val toljuk el az ÁBC-t, akkor az A betű helyet egy C betüt írunk. A nevét onnan kapta, hogy Julius Ceasar Róma császára így kommunikált tábornokaival. De kezdjük is el a programot a main osztállyal.</para>
+<programlisting language="java"><![CDATA[
+public class Main {
+
+	public static void main(String[] args) throws IOException {
+		String fileName = args[0];
+		int offset = Integer.valueOf(args[1]);
+		try (StreamEncoder handler = new ConsoleInputToFileCeasarEncoder(fileName, offset)) {
+			handler.handleInputs();
+		}
+	}
+
+}
+]]></programlisting>
+<para>Mint látható a main függvényünk nem túl bonyolult. Megadjuk a fájl nevét amibe dolgozni fogunk, illetve az offset-t ami az eltollás érdéke lesz. Ezt követően átadjuk az adatokat a handlernek ami egy StremEncoder, amiben végre hajtjuk a titkosítást, de elsőnek nézzük meg magát a titkosítást.</para>
+
+<programlisting language="java"><![CDATA[
+public class ConsoleInputToFileCeasarEncoder extends StreamToFileCeasarEncoder {
+
+	public ConsoleInputToFileCeasarEncoder(String fileName, int offset)
+			throws FileNotFoundException {
+		super(System.in, fileName, offset);
+	}
+
+}
+]]></programlisting>
+<para>A ConsoleInputToFileCeaserEncoderrel olvasunk be az interfészről, majd tovább adjuk a kimeneti fájl és az offset méretét</para>
+<programlisting language="java"><![CDATA[
+public class CeasarCoder implements Encoder, Decoder {
+
+	private final int offset;
+
+	public CeasarCoder(int offset) {
+		if (offset < 1 || offset > 127) {
+			throw new IllegalArgumentException("Offset must be between 1 and 127");
+		}
+		this.offset = offset;
+	}
+
+	public CeasarCoder() {
+		this.offset = 1;
+	}
+]]></programlisting>
+<para>A CeasarCodert két részben fogjuk átnézni. Elsőnek is megemlíteném, hogy az Encoder és Dedcoder osztály egyaránt implementálja de mivel ezzen kivól mást nem tesznek, nem tartom lényegesnek beszúrni a kójukat. Ahogy láthatjuk két konstruktor van, ezt egy fajta hibakezelés miatt csináltuk így. Amennyiben offset érték nélkül kerül meghívásra az osztály, ez esetben egy lesz annak értéke, ha pedig kap értéket, akkor leelenörzi, hogy 1 és 127 közötti-e az érték.</para>
+<programlisting language="java"><![CDATA[
+@Override
+	public String decode(String text) {
+		return buildString(text, character -> (char) ((character - offset) % 128));
+	}
+
+	@Override
+	public String encode(String text) {
+		return buildString(text, character -> (char) ((character + offset) % 128));
+	}
+
+	private String buildString(String text, Function<Character, Character> function) {
+		StringBuilder result = new StringBuilder();
+		for (char character : text.toCharArray()) {
+			if (character != ' ') {
+				result.append(function.apply(character));
+			} else {
+				result.append(character);
+			}
+		}
+		return result.toString();
+	}
+]]></programlisting>
+<para>A fenti kódrészben történik maga a kodolás és visszafejtés. Mint látható az encode és Decode függvények úgyan úgy müködnek, csupán abban különböznek, hogy az anonim eljárásban a kódálsnál hozzáadjuk, a visszafejtésben, pedig kivonjuk az eltolás értékét. A szöveg felépítését StringBuilder segítségével oldjuk meg, ami azt jelenti, hogy magát a szöveget nem hozzuk létre, ameddig meg nem történt a teljes átalakítás. Látható, hogy a for ciklusban egyenként végig megyünk a karakter sor elemein, és ha azok nem szöközzök, átalakítjuk, majd csak appendeljük azt a többihez. A végént a result.toString() lesz az, ami létrehozza a kész karaktersort.</para>
+<programlisting language="java"><![CDATA[
+public class StreamEncoder implements AutoCloseable {
+
+	private static final byte[] NEW_LINE = "\n".getBytes();
+	
+	private Scanner inputScanner;
+	private OutputStream outputStream;
+	private Encoder encoder;
+
+	public StreamEncoder(InputStream inputStream, OutputStream outputStream, Encoder encoder) {
+		this.inputScanner = new Scanner(inputStream);
+		this.outputStream = outputStream;
+		this.encoder = encoder;
+	}
+
+	public void handleInputs() throws IOException {
+		String line;
+		do {
+			line = inputScanner.nextLine();
+			String encodedLine = encoder.encode(line);
+			outputStream.write(encodedLine.getBytes());
+			outputStream.write(NEW_LINE);
+		} while (!"exit".equals(line));
+	}
+
+	@Override
+	public void close() throws IOException {
+		inputScanner.close();
+		outputStream.close();
+	}
+
+}
+]]></programlisting>
+<para>Most pedig nézzük meg a StreamEncodert. Mint látható lényegesen a handleInputs metódust fogjuk használni. Létrehozunk benne egy üres sort és do while ciklussal addig hajtjuk végre az utasításokat, amíg a sor egyenlő nem lesz az "exit" szöveggel. A Scannar nextLine metódusa egy teljes sort olvas be nekünk, majd ezt titkosítjuk, kiíratjuk és egy sortörést is kiíratunk.</para>
+</section>
+</chapter>

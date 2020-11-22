@@ -1,0 +1,203 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Stroustrup!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+
+	<section>
+        <title>JDK osztályok</title>
+        <para>
+	Írjunk olyan Boost C++ programot (indulj ki például a fénykardból) amely kilistázza a JDK összes
+osztályát (miután kicsomagoltuk az src.zip állományt, arra ráengedve)!
+        </para>
+	<para>
+	Feladatunkban a Boost könyvtárat felhasználva kell kiíratnunk egy C++ program segítségével a JDK összes
+osztályát. Az elso feladat a Boost könyvtárat feltenni, ha még nincs a gépünkön akkor azt az alábbi módon ˝
+tudjuk megtenni: "sudo apt-get install libboost-all-dev". Azért van erre szükségünk, ugyanis az elérési utat
+és a kiterjesztést is ezel tudjuk elvégezni.
+	</para>
+	<programlisting language="c++"><![CDATA[
+#include <iostream>
+#include <string>
+#include <map>
+#include <iomanip>
+#include <fstream>
+#include <vector>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/program_options.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+using namespace std;
+using namespace boost::filesystem;
+
+int szamlalo = 0;
+
+void read_file ( boost::filesystem::path path, std::vector<std::string> acts )
+{
+
+	if ( is_regular_file ( path ) ) {
+
+		std::string ext ( ".java" );
+
+	if ( !ext.compare ( boost::filesystem::extension ( path ) )  ) {
+
+		cout<<path.string()<<'\n';
+		std::string actpropspath = path.string();
+		std::size_t end = actpropspath.find_last_of ( "/" ) ;
+		std::string act = actpropspath.substr ( 0, end );
+
+acts.push_back(act);
+szamlalo++;
+}
+
+	} else if ( is_directory ( path ) )
+			for ( boost::filesystem::directory_entry & entry : 
+				boost::filesystem::directory_iterator ( path ) )
+				read_file ( entry.path(), acts );
+}
+
+int main ( int argc, char *argv[] )
+{
+string path="src";
+vector<string> acts;
+read_file(path,acts);
+cout<<"szamlalo: "<<szamlalo<< std::endl;
+return 0;
+}
+	]]></programlisting>
+<para>
+	A programunk azt fogja csinálnni, hogy kírja a ".java" végzodés ˝u fájlokat, és ezek elérési útját, majd a végén hogy összesen hány darab van ezekb ˝ ol. A program- ˝
+ban elosz ˝ or elvégezzük a szükséges include-kat a boost mappából és amikre még szükségünk lesz (vector, ˝
+iostream ...stb). Ezek után elosz ˝ or is létre kell hozni egy egész típusú változót amivel számolni fogjuk a ˝
+fájlok számát mégpedig úgy, hogyha van egy ".java" végzodés ˝u fájl, akkor növeljük egyel az értékét. A re- ˝
+ad_file() függvény segítségével fogjuk beolvasni a mappákat és azok tartalmait. If-ek használatával fogjuk
+megvizsgálni a kiterjesztést. És itt adjuk meg a zelérési utat is. A vectorba fogjuk beletenni az összes .java
+fájlt az elérési úttal együtt. A legvégén pedig ezeket kiíratjuk.
+        </para>
+</section>
+
+<section> 
+<title>EPAM: It's gone. Or is it?</title>
+        <para>
+	Adott a következő osztály:
+        </para>
+	<programlisting language="java"><![CDATA[
+	public class BugousStuffProducer {
+private final Writer writer;
+public BugousStuffProducer(String outputFileName) throws
+IOException {
+writer = new FileWriter(outputFileName);
+}
+public void writeStuff() throws IOException {
+writer.write("Stuff");
+}
+@Override
+public void finalize() throws IOException {
+writer.close();
+}
+}
+	]]></programlisting>
+	<para>
+	Mutass példát arra az esetre, amikor előfordulhat, hogy bár a program futása során meghívtuk a
+writeStuff() metódust, a fájl, amibe írtunk még is üres.
+        </para>
+	<para>
+	A fenti kód részlettel azért fordulhat elő az, hogy nem íratunk ki semmit a fájlba, a meghívás ellenére, mivel eldobtuk az IOExceptiont. Az az a program nem nézi meg, hogy sikerült-e megnyitni a fájlt vagy sem. A félév során azt is tapasztalhattuk, hogy ha nem dobjuk el az IOExceptiont, akkor mindig kéri, hogy try-catchbe helyezük a beolvasásokat, ez itt elmaradt ezért van lehetőség arra, hogy fájlbaírás nélkül fut le a program. Az orvoslása nagyon egyszerű, ahol a fájl megnyitásra kerül és ahol írunk bele az IOExceptiont nem dobjuk el, illetve a fájl megnyitását egy try-ba teszük. Az utobbi lépés azért szükséges, mivel így nem is fog tovább menni a program, ha nincs fájl megnyitva. A javítót verzió:
+        </para>
+	<programlisting language="java"><![CDATA[
+	public class FinalizeFixedExample {
+
+    public static void main(String[] args) throws Exception {
+        try (BugousStuffProducer stuffProducer = new BugousStuffProducer("someFile.txt")) {
+            stuffProducer.writeStuff();
+        }
+    }
+
+    private static class BugousStuffProducer implements AutoCloseable {
+        private final Writer writer;
+
+        public BugousStuffProducer(String outputFileName) throws IOException {
+            writer = new FileWriter(outputFileName);
+        }
+
+        public void writeStuff() throws IOException {
+            writer.write("Stuff");
+        }
+
+        @Override
+        public void close() throws Exception {
+            writer.close();
+        }
+    }
+}
+	]]></programlisting>
+</section> 
+
+<section> 
+<title>EPAM: Kind of equal</title>
+        <para>
+	Adott az alábbi kódrészlet.
+        </para>
+	<programlisting language="java"><![CDATA[
+	p// Given
+String first = "...";
+String second = "...";
+String third = "...";
+// When
+var firstMatchesSecondWithEquals = first.equals(second);
+var firstMatchesSecondWithEqualToOperator = first == second;
+var firstMatchesThirdWithEquals = first.equals(third);
+var firstMatchesThirdWithEqualToOperator = first == third;
+	]]></programlisting>
+	<para>
+	Változtasd meg a String third = "..."; sort úgy, hogy a
+firstMatchesSecondWithEquals, firstMatchesSecondWithEqualToOperator,
+firstMatchesThirdWithEquals értéke true, a
+firstMatchesThirdWithEqualToOperator értéke pedig false legyen. Magyarázd
+meg, mi történik a háttérben.
+	</para>
+	<para>
+	Mielőtt elkezdjük a változtatásokat nézzük meg, hogy mi is történik. Mind látható mindhárom változónkban úgyan az az érték. A Java ezt nagyon okosan kezeli, ez esetben nem hozza létre az adot elemet, csak egyszer és a három változónk mind úgyan arra mutat, ezzel erőforrást sporolva. Tisztázás képpen a három változó különbözik, de egy adott memóriacímre utal, ahol az érték elmentésre került. Tegyük meg a következő átírást:
+	</para>
+	<programlisting language="java"><![CDATA[
+String third = new String("...");
+	]]></programlisting>
+	<para>
+	Erre az átírásra azért volt szükség, mivel így, annak ellenére, hogy úgyan az van a mindhárom változónkban, a harmadik újra elmentésre kerül egy másik memóriacímben. Na de miért van erre szükség? Mint ahogy azt már tanultuk az equals() és az == között különbség van. Az equals() a két változó tartalmát hasonlítja össze, az == pedig azok memóriacímét, ezért lesz az utolsó állítás hamis. A first és a third bár úgyan azt taralmazzák és az equals() erre igazat is adott, a két érték nem egy memóracímen szerepel ezért az == hamis értéked add vissza.
+	</para>
+</section> 
+<section>
+<title>EPAM: Java GC</title>
+        <para>
+	Mutasd be nagy vonalakban hogyan működik Java-ban a GC (Garbage Collector). Lehetséges az
+OutOfMemoryError kezelése, ha igen milyen esetekben?
+        </para>
+	<para>A GC (Garbage Collector - Szemét gyüjtő) lényege, a memória kezelésben keresendő. Feladata a program által már nem használt memóriát felszabadítani. A Javanak van beépített GC-je, de nézzük meg melyik hét fajta szemétgyűjtővel találkozhatunk.</para>
+	<para>Serial Garbage Collector - egy egyszerű GC implementáció. Alapjában egyszállon történik a szemét gyüjtés és felszabadítás.Teljesen leállítja az alkalmazást a memória kezelés idejére.</para>
+	<para>Parallel Garbage Collector - több szállon történik a szemét gyűjtés és felszabadítás, e miatt nagyobb a CPU igénye, miny a Serial Garbage Collectornak, de gyorsabb is.Teljesen leállítja az alkalmazást a memória kezelés idejére.</para>
+	<para>
+	CMS Garbage Collector - Több szállon történik a szemét gyűjtés. Olyan aplikációkban használjuk, ahol fontos a válasz idő. A szemétgyűjtés itt négy fázisból áll: initial mark, concurrent marking phase/pre-cleaning, remarking, concurrent sweeping. Az inital mark-ban a prgoram megjelőli az obijektumokat, ez idő alatt a program áll. Concurrent marking phase fázisban az alkalmazás futásával egy időben (és ettől konkurens) bejelöli a tranzitíven elérhető objektumokat. A remarkban ismét leáll a program és az elöző fázisban módosult obijektumokat, ezzel véglegesítve az élő obijektumok megjelölését. Az utolsó fázisban a sweepingban pedig törli a memória szemetet.
+        </para>
+	<para>
+	G1 Garbage Collector - Több magon futó, nagy memóriával rendelkező aplikációkhoz tervezték. A memóriát több részre pontja és egyszere fésüli át őket. A G1 sok tekintetben a CMS-hez hasonlóan működik. Ez is egy konkurens marking fázisban határozza meg, mely objektumok vannak használatban. Mikor a mark fázis kész, a G1 már tudja, hogy melyek a nagyrészt üres régiók. Elsőként ezeket tisztítja ki, ami általában nagy szabad területet eredményez.
+        </para>
+	<para>
+	Epsilon Garbage Collector - Egy passzív szemétgyüjtő, lefoglalja a memóriát az aplikációnak, de nem gyüjtí össze a nem használatos elemeket. Ez a módszer megengedi, hogy az aplikáció kifusson a memóriából és összeomoljon. Jó arra, hogy leteszteljük, a programunk mennyi memóriát használ, mivel elzártan futatja azt, a megadott memória értékkel.
+        </para>
+	<para>
+	Z garbage collector - A programot maximum 10ms-ra álítja le, e miatt ajánlott olyan aplikációkhoz, ahol a nagyobb leállás problémát okozhat. Három lépésben dolgozik.
+	</para>
+	<para>
+	Shenandoah - Nagyon minimális időre állítja le a programot, mivel nagyrészt egyidőben fut a programmal.
+	</para>
+	<para>
+	A válasz igen is és nem is. Abban az esetben, ha az OOME nem a mi programunk okozta, hanem egy egyébb  a háttérben futó aplikáció, ez esetben nem. Abban az esetben, ha a mi programunk okozza, és pontosan tudjuk, hogy hol és micsoda képesek vagyunk rá, hogy elkapjuk és kezeljük. Szerintem ennek a legértelmesebb felhasználása az Epsilon GC használatakor lenne, úgyan is ezzel megelözhetjük a program összeomlását, ha az kifút a memóriából.
+	</para>
+</section>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+</chapter>                

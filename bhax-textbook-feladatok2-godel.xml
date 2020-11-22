@@ -1,0 +1,253 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Gödel!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+
+<section>
+	<title>STL map érték szerinti rendezése</title>
+	<para>
+	Feladatunk a mapot érték szerint rendezni. A map egy olyan asszociatív tároló, mely kulcs-érték párokat fog tartalmazni. Nem tudunk duplukált kulcsokat tárolni benne, ugyanis csak egy érték tartozhat egy kulcshoz. Az STL pedig a STandard Template Library, ez a szabványos C++ nyelv könyvtár. Ez biztosítja a megfelelo˝ hash() függvényeket. A feladat azért érdekes, mivel a map kulcs szerint rendez. Tehát hogy érték szerint tudjuk rendezni szükségünk lesz egy kis változtatásra.
+        </para>	
+	<programlisting language="c++"><![CDATA[
+#include <iostream>
+#include <string>
+#include <map>
+#include <iomanip>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/program_options.hpp>
+#include <boost/tokenizer.hpp>
+
+std::vector<std::pair<std::string, int>> sort_map ( std::map <std::string, int> &rank )
+{
+        std::vector<std::pair<std::string, int>> ordered;
+
+        for ( auto & i : rank ) {
+                if ( i.second ) {
+                        std::pair<std::string, int> p {i.first, i.second};
+                        ordered.push_back ( p );
+                }
+        }
+
+        std::sort (
+                std::begin ( ordered ), std::end ( ordered ),
+        [ = ] ( auto && p1, auto && p2 ) {
+                return p1.second > p2.second;
+        }
+        );
+
+        return ordered;
+}
+
+int main(){
+
+	std::map<std::string, int> map;
+	map["egy"]=3;
+	map["ketto"]=4;
+	map["harom"]=2;
+	map["negy"]=1;
+
+	std::vector<std::pair<std::string, int>> megold = sort_map(map);
+
+	for(auto & i: megold){
+		std::cout<<i.first<<" "<<i.second << std::endl;
+	}
+
+}
+	]]></programlisting>
+	<para>
+	Most pedig lássuk a kódot. Az int main() -be létrehozzuk a mapunkat ami egy string és egy int értéket fog kapni (esetünkben például: "egy", 3). A kód alapján láthatjuk, hogy az érték szerinti rendezést úgy oldottuk meg, hogy a map kulcs-érték párokat egy pair vektorba rakjuk. Erre azért van szükség, mivel a vektoron belül már képesek vagyunk érték szerint csökkenobe rendezni a párokat. A végén pedig egy speciális for ciklussal sorba kiíratjuk a vektorunkat.
+        </para>	
+</section>
+
+<section>
+        <title>EPAM: Mátrix szorzás Stream API-val</title>
+        <para>
+	Implementáld le a mátrix szorzást Java-ban for és while ciklusok használata nélkül.
+        </para>
+	<para>
+	A mátrix szorzása for és while ismétlő ciklus nélkül funkcionális programozással lehet megoldani. Hogy ezt meg tudjuk oldani elsőnek is létre kell hozni egy abstarct mátrix osztály, ami a következő képen fog kinézni:
+        </para>
+<programlisting language="java"><![CDATA[
+public abstract class AbstractMatrix implements Matrix {
+
+	protected final int[][] matrix;
+	protected final int rowsLenght;
+	protected final int columnsLenght;
+
+	public AbstractMatrix(int[][] matrix) {
+		this.matrix = matrix;
+		this.rowsLenght = matrix.length;
+		this.columnsLenght = matrix[0].length;
+	}
+
+	public AbstractMatrix(int rowsLenght, int columnsLenght) {
+		this.matrix = new int[rowsLenght][columnsLenght];
+		this.rowsLenght = rowsLenght;
+		this.columnsLenght = columnsLenght;
+	}
+
+	@Override
+	public void setElement(int x, int y, int value) {
+		matrix[x][y] = value;
+	}
+
+	@Override
+	public Matrix multiply(Matrix input) {
+		if (input instanceof AbstractMatrix) {
+			return multiply((AbstractMatrix) input);
+		}
+		throw new IllegalArgumentException("The input matrix should be an instance of AbstractMatrix");
+	}
+
+	abstract protected Matrix multiply(AbstractMatrix input);
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + columnsLenght;
+		result = prime * result + Arrays.deepHashCode(matrix);
+		result = prime * result + rowsLenght;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof AbstractMatrix)) {
+			return false;
+		}
+		AbstractMatrix other = (AbstractMatrix) obj;
+		if (columnsLenght != other.columnsLenght) {
+			return false;
+		}
+		if (!Arrays.deepEquals(matrix, other.matrix)) {
+			return false;
+		}
+		if (rowsLenght != other.rowsLenght) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Matrix [matrix=" + Arrays.toString(matrix) + ", rowsLenght=" + rowsLenght + ", columnsLenght="
+				+ columnsLenght + "]";
+	}
+
+}
+        	]]></programlisting>
+	<para>
+	Mielőtt neki állunk a sozrzásnak, tanulmányozuk át a Matrix osztályunkat. Azért hoztuk létre abstractként, mivel így könnyen bővíthetővé válik, ha ez szükséges. Ha elkezdjük olvasni a deklarálást, láthatjuk, hogy három változóval kezdünk. Az első maga a mátrix, a második a sorok száma, a harmadik pedig az oszlopok száma. Két konstruktorunk van, mivel a mátrixot kétféle képen lehet megadni. Az első módja egy már meglévő mátrix átadása, a második módja a sorok és oszlopok számának megadása (két int érték). Maga a szórzás is kétszer szerepel, az első alkalommal egy Overridedal felül definiáljuk. A felül írt függvény ellenőrzi, hogy a szorzás lehetséges-e és ha igen akkor megy tovább az abstact szorzásra, amiről később lesz szó. Továbbá felül lett írva a hashCode, az equals és a toString függvény is, amit nem szeretnék részleteszni, mivel átlátható a müködésük, e helyett lásuk az eljárás orientált megvalosítását a szorzásnak.
+</para>
+<programlisting language="java"><![CDATA[
+public class LambdaMatrix extends AbstractMatrix {
+
+	public LambdaMatrix(int[][] matrix) {
+		super(matrix);
+	}
+
+	public LambdaMatrix(int rowsLenght, int columnsLenght) {
+		super(rowsLenght, columnsLenght);
+	}
+
+	@Override
+	protected Matrix multiply(AbstractMatrix input) {
+		int[][] result = Arrays.stream(this.matrix)
+				.map(r -> IntStream.range(0, input.columnsLenght)
+						.map(i -> IntStream.range(0, input.rowsLenght).map(j -> r[j] * input.matrix[j][i]).sum())
+						.toArray())
+				.toArray(int[][]::new);
+		return new LambdaMatrix(result);
+	}
+
+}
+]]></programlisting>
+<para>
+	Látható a megoldás csupen egy hosszú utasítás. Látható hogy elsőnek 0-tól az oszlopok számáig veszük az értékeket, majd 0-tól a sorok számáig. Ezt követően kiszámoljuk az értéket, amit egy vektorban mentünk, majd ezzeket a vektorokat belementjük a mátrixunkba és visszaadjuk.
+</para>
+
+</section>  
+    
+
+<section>
+        <title>EPAM: LinkedList vs ArrayList</title>
+        <para>
+	Mutass rá konkrét esetekre amikor a Java-beli LinkedList és ArrayList rosszabb performanciát
+eredményezhet a másikhoz képest. (Lásd még LinkedList és ArrayList forráskódja). Végezz
+méréseket is. (mit csinál az ArrayList amikor megtelik)
+        </para>
+	<para>
+	A két lista között a lényeges különbség és természetesen majd ez okozza a többi eltérést a memória kezelés. A LinkedList nem foglalja le előre az ellemeinek a memóriát. Kezdetben csak az első elemet, a gyökeret ismerjük. Ennek előnye, hogy könnyen bővíthető egészen addig, amíg azt az erőforrásaink megengedik. Azonban megnehezíti a rendezést, a keresést és az elem eltávolítást a lista közepében. Ezzel ellentétben az ArrayList előre lefoglalja a megadot elemszámnak megfelelő memória területet. Ebből adótoan, ezt akkor édemesebb használni, ha előre és biztosan tudjuk az elemek számát. Természetesen a bővítés lehetséges, azonban több időtt vesz igénybe, mint a LinkedListnél, mivel első lépésben lefoglalja az új memória teret, majd átmásolja bele az elemeket.
+        </para>
+	
+    </section>   
+
+
+<section>
+	<title>EPAM: Refactoring</title>
+        <para>
+	Adott egy “legacy” kód mely tartalmaz anonymus interface implementációkat, ciklusokat és
+feltételes kifejezések. Ebben a feladatban ezt a “legacy” kódot szeretnénk átírni lambda kifejezések
+segítségével (metódus referencia használata előnyt jelent!)
+        </para>
+	<programlisting language="java"><![CDATA[
+	public class Refactored {
+
+    	public void refactored() {
+        Runnable runnable = createRunnable();
+        runnable.run();
+
+        Calculator calculator = createCalculator();
+        System.out.println("Calculation result: " + calculator.calculate(3));
+
+        List<Integer> inputNumbers = Arrays.asList(1, null, 3, null, 5);
+        List<Integer> resultNumbers = inputNumbers
+                .stream()
+                .filter(Objects::nonNull)       // number -> number != null
+                .map(calculator::calculate)     // number -> calculator.calculate(number)
+                .collect(Collectors.toList());
+
+        Consumer<Integer> consumerMethod = createConsumerMethod();
+        System.out.println("Result numbers: ");
+        resultNumbers.forEach(consumerMethod);
+
+        Formatter formatter = createFormatter();
+        System.out.println("Formatted numbers: " + formatter.format(resultNumbers));
+    }
+
+    private Runnable createRunnable() {
+        return () -> System.out.println("Runnable!");
+    }
+
+    private Formatter createFormatter() {
+        return numbers -> numbers.stream()
+                .map(String::valueOf)           
+                .collect(Collectors.joining());
+    }
+
+    private Consumer<Integer> createConsumerMethod() {
+        return System.out::println;             
+    }
+
+    private Calculator createCalculator() {
+        return number -> number * number;
+    }
+
+}
+	]]></programlisting>
+	<para>
+	Egy rövid leírás a programról. A Runnable típusú eljárások kifogják íratni a "Runnable!" szöveget. A Calculetor eljárás négyzetre emel.
+A Consumer kiíratja az int típusú értéket, a Formatter pedig az int típusi értéket Stringé alakítja át. A List&lt;Integer&gt; eljárásánál pedig kiválogatjuk az int tipusú értékeket és csak azokkal dolgozunk.
+        </para>
+    </section> 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+</chapter>                
