@@ -1,0 +1,520 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Lauda!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+
+	<section>
+        <title>Port scan</title>
+        <para>MMutassunk rá ebben a port szkennelő forrásban a kivételkezelés szerepére!
+		https://regi.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/ch01.html#id527287
+</para>
+<para>
+A Port Scan azt mutatja meg, hogy egy hálózatnak melyik portjai nyitottak a kommunikációra. Mi most
+meg fogjuk nézni a kódot, amit tanár úr adott meg:
+</para>
+<programlisting language="java"><![CDATA[
+public static void main(String[] args) {
+	for(int i=0; i<1024; ++i)
+		try {
+			java.net.Socket socket = new java.net.Socket(args[0], i);
+			System.out.println(i + " figyeli");
+			socket.close();
+		} catch (Exception e) {
+			System.out.println(i + " nem figyeli");
+		}
+	}
+}
+
+]]></programlisting>
+<para>
+A programunk azt nézi át, hogy melyik portunkat figyeli épp a számítógép. Láthatjuk hogy a program egy
+for ciklusbol, azon belül egy try-catch-bol áll. A program lelke a try blokkon belül van,  mégpedig ˝
+a "java.net.Socket socket = new java.net.Socket(args[0], i);" A vizsgálathoz az argumentumként megkapott IP-címmel próbálunk meg egy
+TCP kapcsolatot létrehozni. Ha sikerült a kapcsolat létrehozása akkor kiíratjuk, hogy "figyeli". Ezek után a socketet, amit nyitottunk be is zárjuk, 
+hogy feloldjuk a lefoglalt portot. Ha viszont a kapcsolat nem sikerült a kapcsolat, akkor az Expection lép életbe,
+ami kiírja, hogy nem figyeli a portot a gép.
+</para>
+<mediaobject>
+        	<imageobject condition="printf">
+        		<imagedata fileref="Lauda/kapu.png" format="PNG" scale="30"/>
+        	</imageobject>
+        </mediaobject>  
+</section>  
+    
+
+<section>
+        <title>EPAM: DI</title>
+	<para>
+	Implementálj egy alap DI (Dependency Injection) keretrendszert Java-ban annotációk és reflexió
+használatával megvalósítva az IoC-t (Inversion Of Control). 
+	</para>
+	<para>
+	Elsőnek is beszéljünk az Inversion of Controlt. Tömörean a lényege, hogy megfordíjuk a függöség kezelését. Az az példányosítást
+	és metódus hívást egy más eszközre, például keret rendszerekre bízzuk. Az osztály kér példányokat, de nem mondja meg hogyan. A Dependency
+	Injection pedig ezt megadja. Azonban nem minden esetben hozz létre új pédányt, hanem ha talál el egy olyan obijektumot, ami
+	szükséges azt adja vissza. Ekkor a konstruktorban kapja meg paraméterrül. Lássuk most a feladat megvalosítását.
+	</para>
+	<programlisting language="java"><![CDATA[
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Bean {
+
+}
+]]></programlisting>
+<programlisting language="java"><![CDATA[
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Qualifier {
+
+	public String name();
+
+}
+]]></programlisting>
+	<para>A fentlátható két kódrészletben létrehoztunk két annótációt. Ezzeket az onnótációkat általában arra használjuk,
+hogy jelezzük JVM-nek a futatásban való eltérést. Definiálás során használtuk még annotációkat. A Target azt mondja meg, hogy
+milyen tipusúra lehet rátenni.</para>
+<programlisting language="java"><![CDATA[
+package com.epam.training.di;
+
+public interface Configuration {
+
+}
+]]></programlisting>
+<programlisting language="java"><![CDATA[
+public interface DiContext {
+
+	public void addBean(String beanName, Object bean);
+
+	public <T> Optional<T> getBean(String beanName, Class<T> clazz);
+
+	public <T> Optional<T> getBean(Class<T> clazz);
+
+}
+]]></programlisting>
+<para>A két annotáci mellet, létrehozunk két interfacet is. Az első a Configuration láthatóan üres, ezt csak nevezékre használjuk majd.
+A DiContext egy kontextus keszelő lesz. Ebben absztrak methodokat fogunk használni. Beaneket fogunk tudni beletenni illetve kinyerni
+A methodunkat két féle képen lehet majd használni, ezért kétféle képpen definiáljuk.</para>
+<programlisting language="java"><![CDATA[
+public class DiContextImpl implements DiContext {
+
+	private Map<String, Object> context = new HashMap<>();
+	private Map<Class< ?>, List<Object>> contextMappedByType = new HashMap<>();
+
+	public void addBean(String beanName, Object bean) {
+		if (context.containsKey(beanName)) {
+			throw new IllegalArgumentException("Bean has been already created: " + beanName);
+		}
+		context.put(beanName, bean);
+		if (contextMappedByType.containsKey(bean.getClass())) {
+			contextMappedByType.get(bean.getClass()).add(bean);
+		} else {
+			List<Object> objectList = new LinkedList<>();
+			objectList.add(bean);
+			contextMappedByType.put(bean.getClass(), objectList);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Optional<T> getBean(String beanName, Class<T> clazz) {
+		Optional<T> ret = null;
+		if (context.containsKey(beanName)) {
+			ret = Optional.of((T) context.get(beanName));
+		} else {
+			ret = Optional.empty();
+		}
+		return ret;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Optional<T> getBean(Class<T> clazz) {
+		Optional<T> ret = null;
+		List<Object> objestList = contextMappedByType.get(clazz);
+		if (objestList == null) {
+			ret = Optional.empty();
+		} else if (objestList.size() != 1) {
+			throw new IllegalArgumentException("There are multiple bean available for type: " + clazz);
+		} else {
+			ret = Optional.of((T) objestList.get(0));
+		}
+		return ret;
+	}
+
+}
+]]></programlisting>
+
+<para>A fenti kódrészletben a DiContext implmentációját láthatjuk. Első sorban létrehozunk egy kontext mappat, ahol a kulcs egy név
+a Bean neve, és az Object maga az elem. A contextMappedByType-ban pedig, egy osztáyt, amiből van egy listányi példánk.
+Az addBean, paraméterül kap egy Bean nevet és példányt, és megnézi, hogy létezik-e, ha nem akkor beleteszi a mappba, különben
+nem. Ha létrehozza, megnézi a következő mappben, és ha abban már abban benne van ez az osztály, akkor az ahoz tartozó listához adja hozzá.
+A getBean-ek megnézik, hogy a paraméter szerepel-e már a mapban, ha igen, akkor becsomagoljuk egy optional típusba és visszaadjuk.
+A második metodus annyiban különbözik, hogy ha az adott osztályhoz több elem tartozik, akkor hiba üzenet küld, mivel ekkor az
+Optional nem müködik megfelelően.</para>
+<programlisting language="java"><![CDATA[
+public class DiContextBuilder {
+
+	public DiContext build(Configuration contextConfiguration) {
+		DiContext context = new DiContextImpl();
+
+		List<BeanDefinition> beanDefinitions = new LinkedList<BeanDefinition>();
+
+		for (Method method : contextConfiguration.getClass().getMethods()) {
+			if (isAnnotatedWithBean(method)) {
+				List<BeanDefinitionParameter> beanDependencies = new LinkedList<DiContextBuilder.BeanDefinitionParameter>();
+				for (Parameter parameter : method.getParameters()) {
+					String name = null;
+					if (parameter.getAnnotation(Qualifier.class) != null) {
+						name = parameter.getAnnotation(Qualifier.class).name();
+					}
+					beanDependencies.add(new BeanDefinitionParameter<>(name, parameter.getType()));
+				}
+				beanDefinitions
+						.add(new BeanDefinition(method.getName(), method.getReturnType(), method, beanDependencies));
+			}
+		}
+
+		int beanDefinitionsSize = beanDefinitions.size();
+		context.addBean("context", context);
+
+		while (beanDefinitions.size() > 0) {
+			List<BeanDefinition> resolvedBeanDefinitions = new LinkedList<>();
+			for (BeanDefinition beanDefinition : beanDefinitions) {
+				if (isBeanDefinitionResolvable(beanDefinition, context)) {
+					context.addBean(beanDefinition.name, createBean(beanDefinition, context, contextConfiguration));
+					resolvedBeanDefinitions.add(beanDefinition);
+				}
+			}
+			beanDefinitions.removeAll(resolvedBeanDefinitions);
+
+			if (beanDefinitionsSize == beanDefinitions.size()) {
+				throw new IllegalArgumentException("Circular dependency!");
+			} else {
+				beanDefinitionsSize = beanDefinitions.size();
+			}
+		}
+
+		return context;
+	}
+
+	private Object createBean(BeanDefinition beanDefinition, DiContext context, Object contextConfiguration) {
+		List<Object> dependencies = new ArrayList<>(beanDefinition.dependencies.size());
+
+		for (BeanDefinitionParameter parameter : beanDefinition.dependencies) {
+			Optional<Object> dependency;
+			if (parameter.name != null) {
+				dependency = context.getBean(parameter.name, parameter.type);
+			} else {
+				dependency = context.getBean(parameter.type);
+			}
+			dependencies.add(dependency.get());
+		}
+
+		try {
+			return beanDefinition.builderMethod.invoke(contextConfiguration, dependencies.toArray());
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private boolean isBeanDefinitionResolvable(BeanDefinition beanDefinition, DiContext context) {
+		for (BeanDefinitionParameter parameter : beanDefinition.dependencies) {
+			Optional<Object> dependency;
+			if (parameter.name != null) {
+				dependency = context.getBean(parameter.name, parameter.type);
+			} else {
+				dependency = context.getBean(parameter.type);
+			}
+			if (dependency.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isAnnotatedWithBean(Method method) {
+		for (Annotation annotation : method.getDeclaredAnnotations()) {
+			if (annotation.annotationType().equals(Bean.class)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private class BeanDefinition {
+		String name;
+		Class type;
+		Method builderMethod;
+		List<BeanDefinitionParameter> dependencies;
+
+		public BeanDefinition(String name, Class type, Method builderMethod,
+				List<BeanDefinitionParameter> dependencies) {
+			super();
+			this.name = name;
+			this.type = type;
+			this.builderMethod = builderMethod;
+			this.dependencies = dependencies;
+		}
+	}
+
+	private class BeanDefinitionParameter<T> {
+		String name;
+		Class<T> type;
+
+		public BeanDefinitionParameter(String name, Class<T> type) {
+			super();
+			this.name = name;
+			this.type = type;
+		}
+	}
+
+}
+]]></programlisting>
+<para>A DiContextBuilderben pedig létrehozza a kontextust, amiben dolgozni fogunk tudni. A bulidernek csak egy publikus metódusa
+van a build, ami paraméterül fog kapni egy configot, és ezzel fogunk dolgozni. Ezt követően létrehozunk egy példányt a kontextből és
+egy üres listát, ami a Bean-eket fogja tárolni. A BeanDefinition és A BeanDefinitionParameter arra szolgál, hogy a Beanről
+információkat szerezzünk. Meg tudjuk a példány nevét, osztályát, builderMethodját és függőségeit. Az első forban végig megyünk
+az osztály összes metódusán. Majd a isAnnotatedWithBean segítségével, ami úgyan úgy végig megy az összes metóduson, megnézi, hogy
+van-e egyforma metódusa az osztálynak és a Beannek. Ezt követően az összes megegyező metódusnak éltrehozunk egy listát és beletesszük.
+</para>
+    </section>        
+
+    <section>
+        <title>EPAM: JSON szerializáció</title>
+	<para>Implementálj egy JSON szerializációs könyvtárat, mely képes kezelni sztringeket, számokat, listákat
+és beágyazott objektumokat. A megoldás meg kell feleljen az összes adott unit tesztnek.
+Plusz feladat: 1. a könyvtár tudjon deszerializálni</para>
+	<para>A JSON fájlról és anak használatáról nem szeretnék írni, úgyan is tanultuk webtechnologiák órán. Annyit említenék meg róla, hogy egyes adatokat
+	hogy tárol. A szövegeket idézőjelekbe teszi, a listát pedig szögletes zárójelekbe, az elemeket vesszővel elválasztva. Térjünk is át a kódra, és nézzük meg a
+	fő osztályt.</para>
+<programlisting language="java"><![CDATA[
+public class MiniObjectMapper {
+
+  private static final Serializer< ? > nullSerializer = new NullSerializer();
+  private static final List<Serializer< ?>> SERIALIZER_LIST = List.of(
+          new StringSerializer(),
+          new NumberSerializer(),
+          new BooleanSerializer(),
+          new ListSerializer(),
+          new ObjectSerializer()
+  );
+
+  private final MainSerializer mainSerializer;
+  
+  public MiniObjectMapper() {
+    this.mainSerializer = new MainSerializer(SERIALIZER_LIST, nullSerializer);
+  }
+  
+  public MiniObjectMapper(List<Serializer< ?>> customSerializerList) {
+    List<Serializer< ?>> finalSerializerList = new ArrayList<>(customSerializerList);
+    finalSerializerList.addAll(SERIALIZER_LIST);
+    this.mainSerializer = new MainSerializer(finalSerializerList, nullSerializer);
+	
+	public String toJson(Object obj) {
+    return mainSerializer.serialize(obj, mainSerializer);
+  }
+
+}
+  }
+]]></programlisting>
+<para>A főosztályban indulás kép létrehozunk egy új Serializer interfészeket tartalmazó listát, amiben minden érték típusnak egy saját Serializere lesz. Ezt a feladat végén típusonként
+ végig nézzűk. Ezt követően MiniObjectMapper-t, ami az össze tett objectet mappolás segítségével felbontja egyszerűbb részlekre. A legvégén pedig a toJson kírja az így elkészült
+ Json fájlt, a return résznél megfigyelgető, hogy a meghívja saját magát rekúrzívan.</para>
+ <para>Nézzük magát a Serializer interfacet. Mint látható ezt generikusan írtuk meg, így ezt az interfacet több típusra is használhatjuk, egyszer egyszerűsítve, 
+ és meggyosítva feladatunk. Itt vissza is tudjuk adni a paraméterként kapot obijektum osztályát.</para>
+<programlisting language="java"><![CDATA[
+public interface Serializer<T> {
+String serialize(T obj, Serializer<Object> mainSerializer);
+Class<T> getSourceClass();
+}
+]]></programlisting>
+<programlisting language="java"><![CDATA[
+public class MainSerializer implements Serializer<Object> {
+
+    private final List<Serializer< ?>> serializerList;
+    private final Serializer< ?> nullSerializer;
+
+    public MainSerializer(List<Serializer< ?>> serializerList, Serializer< ?> nullSerializer) {
+        this.serializerList = serializerList;
+        this.nullSerializer = nullSerializer;
+    }
+
+    @Override
+    public String serialize(Object obj, Serializer<Object> mainSerializer) {
+        Serializer<Object> selectedSerializer = (Serializer<Object>) selectSerializer(obj);
+        return selectedSerializer.serialize(obj, this);
+    }
+
+    @Override
+    public Class<Object> getSourceClass() {
+        return Object.class;
+    }
+
+    private Serializer< ? > selectSerializer(Object obj) {
+        return serializerList.stream()
+                .filter(serializer -> serializer.getSourceClass().isInstance(obj))
+                .findFirst()
+                .orElse(nullSerializer);
+    }
+
+}
+]]></programlisting>
+<para>A MainSerializer-ben csupán egy elemmel dolgozunk. A selectSerializer fogja kiválasztani a megfelelő Serializert 
+a serialize-ben található getSourceClass segítségével, aamit Overrideltunk. Ha listán végig érve nem találja meg a megfelelő osztályt, akkor 
+a nullSerializer-t adja vissza. Most pedig akkor lássuk a típusok Serializerét.</para>
+<programlisting language="java"><![CDATA[
+ public class BooleanSerializer implements Serializer<Boolean> {
+
+    @Override
+    public String serialize(Boolean obj, Serializer<Object> mainSerializer) {
+        return obj ? "true" : "false";
+    }
+
+    @Override
+    public Class<Boolean> getSourceClass() {
+        return Boolean.class;
+    }
+
+}
+]]></programlisting>
+	<para> A BooleanSerializer a "true" vagy "false" karaktersort adja vissza, a boolean igazságértéke szerint.</para>
+	<programlisting language="java"><![CDATA[
+ public class NullSerializer implements Serializer<Object> {
+
+    @Override
+    public String serialize(Object obj, Serializer<Object> mainSerializer) {
+        return "null";
+    }
+
+    @Override
+    public Class<Object> getSourceClass() {
+        return Object.class;
+    }
+
+}
+]]></programlisting>
+<para>A nullSerializer a "null" karaktersort adja vissza.</para>
+<programlisting language="java"><![CDATA[
+ public class NumberSerializer implements Serializer<Number> {
+
+    @Override
+    public String serialize(Number obj, Serializer<Object> mainSerializer) {
+        return obj.toString();
+    }
+
+    @Override
+    public Class<Number> getSourceClass() {
+        return Number.class;
+    }
+
+}
+]]></programlisting>
+<para>A NumberSerializer a paraméterként szám értéket adja vissza string formában.</para>
+<programlisting language="java"><![CDATA[
+ public class StringSerializer implements Serializer<String> {
+
+    @Override
+    public String serialize(String obj, Serializer<Object> mainSerializer) {
+        return "\""+obj+"\"";
+    }
+
+    @Override
+    public Class<String> getSourceClass() {
+        return String.class;
+    }
+
+}
+
+]]></programlisting>
+<para>A StringSerializer a paraméter ként adott stringer adja vissza idézőjelekben.</para>
+<programlisting language="java"><![CDATA[
+public class ListSerializer implements Serializer<List> {
+
+    @Override
+    public String serialize(List obj, Serializer<Object> mainSerializer) {
+        return (String) obj.stream()
+                .map(o -> mainSerializer.serialize(o, mainSerializer))
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    @Override
+    public Class<List> getSourceClass() {
+        return List.class;
+    }
+
+}
+]]></programlisting>
+<para>A ListSerializer egy streamet készít a lista elemeiből, majd ezt egy collectionbe helyezi egy kapcsos zárójel párosba, az elemekt vesszővel elválasztva.
+A végeredményt kasztoljuk és sztringként adjuk vissza.</para>
+<programlisting language="java"><![CDATA[
+public class ObjectSerializer implements Serializer<Object> {
+
+    @Override
+public String serialize(Object obj, Serializer<Object> mainSerializer) {
+        return Arrays.stream(obj.getClass().getDeclaredFields())
+                .map(field -> {
+                    try {
+                        String name = field.getName();
+
+                        if (!field.canAccess(obj)) {
+                            field.setAccessible(true);
+                        }
+
+                        String value = mainSerializer.serialize(field.get(obj), mainSerializer);
+
+                        return String.format("\"%s\":%s", name, value);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                    return "";
+                })
+                .collect(Collectors.joining(",", "{", "}"));
+    }
+
+    @Override
+    public Class<Object> getSourceClass() {
+        return Object.class;
+    }
+
+}
+]]></programlisting>
+<para>A az ObjectSerializer úgyan úgy müködik, mint a ListSerializer, annyi az eltérés, hogy az obijectben több tipus is szerepelhet
+ezét minden elemére megkell hívni a mainSerializer-t.</para>
+    </section> 
+  
+<section>
+        <title>EPAM: Kivételkezelés</title>
+	<para>Adott az alábbi kódrészlet. Mi történik, ha az input változó 1F, “string” vagy pedig null? Meghívódik
+e minden esetben a finally ág? Válaszod indokold!</para>
+<programlisting language="java"><![CDATA[
+ public void test(Object input) {
+        try {
+            System.out.println("Try!");
+            if (input instanceof Float) {
+                throw new ChildException();
+            } else if (input instanceof String) {
+                throw new ParentException();
+            } else {
+                throw new RuntimeException();
+            }
+        } catch (ChildException e) {
+            System.out.println("Child Exception is caught!");
+            if (e instanceof ParentException) {
+                throw new ParentException();
+            }
+        } catch (ParentException e) {
+            System.out.println("Parent Exception is caught!");
+            System.exit(1);
+        } catch (Exception e) {
+            System.out.println("Exception is caught!");
+        } finally {
+            System.out.println("Finally!\n");
+        }
+    }
+]]></programlisting>
+<para>A try finally ágáról azt kell tudni, hogy minden esetben meghívódik ha a program nem áll le. Az az a fenti kód részletnek a kimenetén kétszer fog megjelenni, mivel a ParentException-ben egy 1-es kóddal kilépünk mielőtt a Finally ág meghívódásra kerülne.</para>
+    </section> 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+</chapter>                

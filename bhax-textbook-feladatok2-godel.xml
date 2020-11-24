@@ -62,6 +62,11 @@ int main(){
 	<para>
 	Most pedig lássuk a kódot. Az int main() -be létrehozzuk a mapunkat ami egy string és egy int értéket fog kapni (esetünkben például: "egy", 3). A kód alapján láthatjuk, hogy az érték szerinti rendezést úgy oldottuk meg, hogy a map kulcs-érték párokat egy pair vektorba rakjuk. Erre azért van szükség, mivel a vektoron belül már képesek vagyunk érték szerint csökkenobe rendezni a párokat. A végén pedig egy speciális for ciklussal sorba kiíratjuk a vektorunkat.
         </para>	
+	<mediaobject>
+        	<imageobject condition="printf">
+        		<imagedata fileref="Godel/map.png" format="PNG" scale="30"/>
+        	</imageobject>
+        </mediaobject>
 </section>
 
 <section>

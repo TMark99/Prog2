@@ -1,6 +1,6 @@
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
     <info>
-        <title>Helló, Arroway!</title>
+        <title>Helló, Berners-Lee!</title>
         <keywordset>
             <keyword/>
         </keywordset>
@@ -11,46 +11,46 @@
 
         <para>
             Az első felvonásban a C++ program nyelvel foglalkoztunk. 
-            Ebben a fejezetben betekintést nyerhetünk a <command>Java</command> program nyelvbe, amely az objektum orientált programozási nyelvek családjába tartozik. 
+            Ebben a fejezetben betekintést nyerhetünk a Java program nyelvbe, amely az objektum orientált programozási nyelvek családjába tartozik. 
         </para>
        <para>
             Bevezetőként ismerjük meg a jelölések és rövidítések jelentését:
         </para>
             <para>
-                <command>OOP</command> = Objektum Orientált Programozás
+                OOP = Objektum Orientált Programozás
             </para>
             
             <para>
-                <command>OO</command> = Objektum Orientált
+                OO = Objektum Orientált
             </para>
 
             <para>
-                <command>Példány</command> = Egy osztály objektum, melyből egyetlen és egyedi létezik. Viszont egy osztálynak több objektuma is létezhet.
+                Példány = Egy osztály objektum, melyből egyetlen és egyedi létezik. Viszont egy osztálynak több objektuma is létezhet.
             </para>
         
         <para>
-            Mi az az objektum oriáltság? Erre a kérdésre egy egyszerű válasz az <command>osztályozás</command> használata. Tehát az osztályozás azt 
+            Mi az az objektum oriáltság? Erre a kérdésre egy egyszerű válasz az osztályozás használata. Tehát az osztályozás azt 
             jelenti, hogy egy programban több kategorizálást hozhatunk létre és ezekel jól elkülönítve tudunk dolgozni. Egy egyszerűbb példán keresztül 
             demonstrálva az osztályozás és az objektum orientáltság azt jelenti, hogy választunk például egy bizonyos tárgyat, amelynek több tulajdonsága 
-            megegyezik egy másik hasonló tárgyéval, jelent esetben legyen egy <command>autó</command>. Ha van egy autónk akkor biztosan vannak kerekei, ablakai, 
+            megegyezik egy másik hasonló tárgyéval, jelent esetben legyen egy autó. Ha van egy autónk akkor biztosan vannak kerekei, ablakai, 
             súlya, színe, és még sorolhatnánk, tehát bizonyos tulajdonságokkal rendelkezik. De ha nekünk van autónk akkor másnak miért ne lenne, és ha több autó 
             is létezik akkor kell legyen egy gyár ahol elkészülnek az autók. Ha az autó gyárra gondolunk képzeljük el, hogy a gyárban több autót gyártanak 
             naponta, tehát minden egyes autó egy példány, hiszen minden autó kap gyártáskor egy alvázszámot, ezért még ha nagyon is hasonlít két autó akkor sem 
-            ugyan arról az autóról beszélünk. A <command>java</command>-ban az OO-ságot képzeljük el gyáraknak ahol minden gyárban, azaz oztályban, más-más termék 
+            ugyan arról az autóról beszélünk. A java-ban az OO-ságot képzeljük el gyáraknak ahol minden gyárban, azaz oztályban, más-más termék 
             gyártása történik. Az osztályokat, mint a gyárakat, azért hozták létre, hogy megkönnyísenek valamit, hiszen egyszerűbb általánosságban foglalkozni egy 
             autó megtervezésével mintha minden egyes autó legyártása után el kellene gondolkozni azon, hogy hogyan is készült az előbb elkészült autó? Hanem egy 
             osztályt, azaz egy tervet hozva létre, így minden autót márkától, modeltől függően gyártanak egymás után. 
         </para>
         <para>
-            Ezen egyszerű példán keresztül a <command>java</command> nyelv is felfogható nagyon egyszerűen, hiszen egy OO nyelv. A C++ viszont többelvű programozási 
+            Ezen egyszerű példán keresztül a java nyelv is felfogható nagyon egyszerűen, hiszen egy OO nyelv. A C++ viszont többelvű programozási 
             nyelvnek mondható, mert abban nem feltétlenül kell OO szemléletben programozni. A java nyelv a C nyelvhez nagyon hasonlít szintakszisban hiszen a mindkét 
             nyelv egymáshoz időben közel kerül kiadásra. A Java még a régebbi C nyelvhez hasonlít kulcsszavaiban, de a C++ mára már sok fejelsztésen esett 
             keresztül, ezért kulcsszavakban már rövidebb szintaktikát használ. Mindkét nyelvről elmondható, hogy magas szintű programozási nyelv, azaz felhasználó 
             közeli nyelv, ellentétben az alacsony szintűekkel amelyek gépközeli, a gép által könnyen megértett nyelvet képviselik.   
         </para>
         <para>
-            A Java nyelv hírnevét eredetileg a <command>WWW</command> oldalakon betölött szerepének köszönheti, ahol appleteket hoztak létre melyeket 
-            <command>HTML</command> oldalak használtak. Egyszerű példa erre egy bejelentkező ablak felület melynek a működését java nyelven írtak.
+            A Java nyelv hírnevét eredetileg a WWW oldalakon betölött szerepének köszönheti, ahol appleteket hoztak létre melyeket 
+            HTML oldalak használtak. Egyszerű példa erre egy bejelentkező ablak felület melynek a működését java nyelven írtak.
         </para>
         <para>
             Mivel a Java nyelv nagyban hasonlít a C++ nyelvhez ezért érdemes szinkronban beszélni róluk.
@@ -67,52 +67,52 @@
             <itemizedlist>
                 <listitem>
                     <para>
-                        <command>boolean</command> : igaz vagy hamis logiaki érték.
+                        boolean : igaz vagy hamis logiaki érték.
                     </para>
                 </listitem>
 
                 <listitem>
                     <para>
-                        <command>char</command> : 16 bites Unicode karakter.
+                        char : 16 bites Unicode karakter.
                     </para>
                 </listitem>
 
                 <listitem>
                     <para>
-                        <command>int</command> : 32 bites előjeles egész szám.
+                        int : 32 bites előjeles egész szám.
                     </para>
                 </listitem>
 
                 <listitem>
                     <para>
-                        <command>short</command> : 16 bites előjeles egész szám.
+                        short : 16 bites előjeles egész szám.
                     </para>
                 </listitem>
 
                 <listitem>
                     <para>
-                        <command>long</command> : 64 bites előjeles egész szám.
+                        long : 64 bites előjeles egész szám.
                     </para>
                 </listitem>
 
                 <listitem>
                     <para>
-                        <command>float</command> : 32 bites lebegőpontos racionális szám.
+                        float : 32 bites lebegőpontos racionális szám.
                     </para>
                 </listitem>
                 
                 <listitem>
                     <para>
-                        <command>double</command> : 64 bites lebegőpontos racionális szám.
+                        double : 64 bites lebegőpontos racionális szám.
                     </para>
                 </listitem>
             </itemizedlist>
             <para>
-                A <command></command> operátorral a bal oldalán lévő változóhoz a jobb oldalán lévő értéket rendeljük.
+                A  operátorral a bal oldalán lévő változóhoz a jobb oldalán lévő értéket rendeljük.
             </para>
         <para>
-            Kommenteket is lehet írni amiben magyarázni tudjuk a kódunk mellett működését. Egy soros kommenthez <command>"//"</command> jelet, 
-            több soros kommenthez <command>"/* commnet */"</command>-et használunk.
+            Kommenteket is lehet írni amiben magyarázni tudjuk a kódunk mellett működését. Egy soros kommenthez "//" jelet, 
+            több soros kommenthez "/* commnet */"-et használunk.
         </para>
         <para>
             Literálok:
@@ -159,7 +159,7 @@
         </para>
         <para>
             Javaban is mint a C++-ban léteznek tömbök amelyket itt inkább listaként definiálnak. A tömbök lehetnek szöveg és szám tipusúak, 
-            a lényegük, hogy több értéket képesek eltárolni. Az <command>enum</command> kulcsszóval speciális listát hozhatunk létre, 
+            a lényegük, hogy több értéket képesek eltárolni. Az enum kulcsszóval speciális listát hozhatunk létre, 
             melyre hivatkozhatunk később a kódunkban, amely egy nem bővíthető listaként funkcionál.
         </para>
 
@@ -167,9 +167,9 @@
             Structúra: 
         </para>
         <para>
-            A <command>Struct</command> kulcsszóval hozhatjuk létre és megadhatunk több típusú változót egy structurában amelyet később 
+            A Struct kulcsszóval hozhatjuk létre és megadhatunk több típusú változót egy structurában amelyet később 
             mint egy definiált új tipust használhatunk összesített típusként. Egy struktura elemeire külön-külön hivatkozhatunk 
-            a <command>strukturaNeve.elem</command> kombinációval.
+            a strukturaNeve.elem kombinációval.
         </para>
 
         <para>
@@ -179,14 +179,14 @@
         <para>
             A vektor már jól ismert a C++-ból. Egy vektor létrehozása a javaban a következőképpen néz ki:
         </para>
-        <porgramlisting language="java"><![CDATA[
+        <programlisting language="java"><![CDATA[
             Vector <int> num = new Vector <int> ();
             Vector <String> str = new Vector <String> ();
-        ]]></porgramlisting>
+        ]]></programlisting>
         <para>
-            Ha értékeket akarunk adni egy vektorba azt az <command>add()</command> függvénnyel tehetjük meg.
+            Ha értékeket akarunk adni egy vektorba azt az add() függvénnyel tehetjük meg.
         </para>
-        <porgramlisting language="java"><![CDATA[
+        <programlisting language="java"><![CDATA[
             num.add(1);
             num.add(2);
             num.add(3);
@@ -194,20 +194,20 @@
             str.add("Név: Pisti");
             str.add("Kor: 21");
             str.add("Lakhely: Debrecen");
-        ]]></porgramlisting>
+        ]]></programlisting>
         <para>
             A stringes vagy szöveges vektor helyet érdemees egy structurát létrehozni, ha a fent látott tulajdonságokat akarjuk 
             eltárolni és így több ilyen személynek a tulajdonságait is tárolhatjuk, ha tömbként hozzuk létre.
         </para>
-        <porgramlisting language="java"><![CDATA[
+        <programlisting language="java"><![CDATA[
             Struct
-        ]]></porgramlisting>
+        ]]></programlisting>
         <para>
-            Javaban a legkisebb önálló elem az osztály, míg C++-ban nem feltétenül kell osztályokat használni. Tehát egy osztályt a <command>class</command> 
+            Javaban a legkisebb önálló elem az osztály, míg C++-ban nem feltétenül kell osztályokat használni. Tehát egy osztályt a class 
             kulcsszóval hozunk létre. Az osztály fogalmát feljebb megérthettük, röviden az azonos tipusú dolgok modeljét írja le. Az osztályban létrehozhatunk 
             változókat és függvényeket, metódusokat. Változókat a fent ismertetett tipusnév kulcsszót a neve elé írva hozhatunk létre. Egy függvényt pedig 
-            úgyan úgy mint egy változót, tehát a tipusát megadva, de a név után egy <command>"()"</command> zárójeleket írva majd ezt követve a 
-            <command>"{}"</command> zárójelek közé írva megadjuk a működését.
+            úgyan úgy mint egy változót, tehát a tipusát megadva, de a név után egy "()" zárójeleket írva majd ezt követve a 
+            "{}" zárójelek közé írva megadjuk a működését.
         </para>
         <para>
             Osztályok:
@@ -226,7 +226,7 @@
             Egy osztály létrehozása a class kulcsszóval majd egy név megadásával történik, példa egy osztályra benne egy függvénnyel:
         </para>
 
-        <porgramlisting language="java"><![CDATA[
+        <programlisting language="java"><![CDATA[
             //java
             public class Pelda{
 
@@ -247,7 +247,7 @@
                     cout<<"Hello";
                 }
             }
-            ]]></porgramlisting>
+            ]]></programlisting>
 
         <para>
             Az osztály szintjei, vagy a jogosultságok:
@@ -258,14 +258,14 @@
             elé írva lesz definiálva, másszóval Javaban egyfajta tipusként van definiálva.
         </para>
             <para>
-                <command>Public</command> rész, amely egy kulcsszó is egyben, tehát Javaban ezt elé írva egy változónak vagy függvénynek elérjük hogy más 
+                Public rész, amely egy kulcsszó is egyben, tehát Javaban ezt elé írva egy változónak vagy függvénynek elérjük hogy más 
                 osztályban is látható legyen, ne csak abban ahol létrehoztuk. 
             </para>
             <para>
-                <command>Private</command> rész, amely lehetővé teszi, hogy csak az az osztály lássa amelyben létrejött.
+                Private rész, amely lehetővé teszi, hogy csak az az osztály lássa amelyben létrejött.
             </para>
             <para>
-                <command>Protected</command> rész, amely lehetővé teszi a megosztását más oszályokban, vagyis a leszármazott osztályok, vagy örökölt osztályok, 
+                Protected rész, amely lehetővé teszi a megosztását más oszályokban, vagyis a leszármazott osztályok, vagy örökölt osztályok, 
                 C++-ban általában azokat a függvényeket amiket itt definiálunk, friend, azaz barát függvényeknek nevezzük. 
             </para>
             <para>
@@ -275,7 +275,7 @@
         <para>
             Objektumokat, vagy példányokat a következő módon hozhatunk létre:
         </para>
-        <porgramlisting language="java"><![CDATA[
+        <programlisting language="java"><![CDATA[
         //java
 
             Pelda objektumNeve = new Pelda();
@@ -284,12 +284,12 @@
 
             Pelda objektumNeve;
         
-        ]]></porgramlisting>
+        ]]></programlisting>
         <para>
             Az osztálynak létezik egy inicializáló függvénye is amely neve hivatkozik maga az osztály 
             nevére, ezt konstruktornak nevezzük.
         </para>
-        <porgramlisting language="java"><![CDATA[
+        <programlisting language="java"><![CDATA[
             public class Pelda {
 
                 Pelda () {
@@ -297,17 +297,17 @@
                     System.out.println("A Pelda osztály konstrukrota");
                 }
             }
-        ]]></porgramlisting>
+        ]]></programlisting>
         <para>
             A fenti konstruktornak nincs paramétere és csak egy kiiratás van benne, de több kontruktort is létrehozhatunk, mint a C++-ban 
             több fajta paraméterrel, amelyek alapján már több bejövő adat alapján is inicializálhatunk.
         </para>
         <para>
-            Minden programnak van egy fő része, egy fő függvénye, ezt nevezik a <command>main</command>-nek. A létrehozása eltér a két nyelvben. 
+            Minden programnak van egy fő része, egy fő függvénye, ezt nevezik a main-nek. A létrehozása eltér a két nyelvben. 
             Míg C++-ban csak egyszerű függvényként hozzuk létre, addig Javaban egy fő osztály lesz amely a main-t tartalmazza. A main() függvény:
         </para>
 
-        <porgramlisting language="java"><![CDATA[
+        <programlisting language="java"><![CDATA[
         //java
 
         public class Main(){
@@ -323,7 +323,7 @@
 
             return 0;
         }
-        ]]></porgramlisting>
+        ]]></programlisting>
 
         <para>
             Létrehozhatunk más függvényeket, azaz metódusokat is amelyek majd a main() metódusban hívhatóak meg, ahol öszpontosul a programunk.
@@ -335,7 +335,7 @@
             Egy metódust a következőképpen hozunk létre:
         </para>
         <para>
-            <command>metódus_Típusa metódus_Neve () { utasítás1; utasítás2; stb... }</command>
+            metódus_Típusa metódus_Neve () { utasítás1; utasítás2; stb... }
         </para>
         <para>
             Egy osztályban egy metódus lehet public, private és protected, ezt a típus elé kell írni.
@@ -345,9 +345,9 @@
             A void az egyetlen függvény típus amelynek nincs visszatérési értéke. 
         </para>
         <para>
-            A metódusokat a <command>{...}</command> között írt utasítások alkotnak, úgynevezett blokkok. Minden utasítást pontosveszővel zárunk le. 
-            Léteznek elágazások amelyek mindkét nyelvben azonosan működnek. Elágazást kétféleképpen hozhatunk létre, egyszerűt az <command>if</command> 
-            kulcsszóval, összetettet a <command>switch</command> kulcsszóval, ez utóbbi esetben eseteket hozunk létre amelyeket <command>case</command> 
+            A metódusokat a {...} között írt utasítások alkotnak, úgynevezett blokkok. Minden utasítást pontosveszővel zárunk le. 
+            Léteznek elágazások amelyek mindkét nyelvben azonosan működnek. Elágazást kétféleképpen hozhatunk létre, egyszerűt az if 
+            kulcsszóval, összetettet a switch kulcsszóval, ez utóbbi esetben eseteket hozunk létre amelyeket case 
             kulcsszavakkal hozunk létre.
         </para>
         <para>
@@ -358,23 +358,23 @@
             A ciklusok:
         </para>
         <para>
-            A <command>for()</command> ciklus ami lépésről lépésre végighalad egy megadott struktúrán. Ennek a ciklusnak 3 része van, 
+            A for() ciklus ami lépésről lépésre végighalad egy megadott struktúrán. Ennek a ciklusnak 3 része van, 
             amelyeket pontosveszővel választunk el egymástól és a ()-zárójelek közé írunk. AZ első rész, a kezdőpont (pl. i = 0) ahonnan kezdjük 
             az elemeket számolni. A második rész a feltétet (pl. i &lt; array.lenght()), avagy végállapot , azaz meddig olvassuk az elemeket és haladjunk a strukturában. 
             A haramadik rész a lépésköz (pl. i++), tehát az idndexelést milyen nagyságban léptetjük, ha minden elemen végig akarunk haladni, akkor 
             egyesével, ha pedig bizonyos elemekre van szükség akkor több elemet is kihagyva.
         </para>
         <para>
-            A <command>while()</command> ciklus, másnéven előltesztelő vagy kezdőfeltételes ciklus, a ciklus ()-zárójelek között lévő feltétel 
+            A while() ciklus, másnéven előltesztelő vagy kezdőfeltételes ciklus, a ciklus ()-zárójelek között lévő feltétel 
             alapján eldönti hogy lefuttatja-e a benne lévő utasításokat vagy sem, ha igaz a feltétel akkor lefut, egyébként hamis érték esetén nem.
         </para> 
         <para>
-            A <command>do {} while();</command> ciklus, másnéven a hátultesztelő vagy végfeltételes ciklus, a ciklus hasonlít az előzőre, viszont itt 
-            a <command>do</command> kulcsszónak köszönhetően minden utasítás lefut a ciklusban, aztán következik a while()-ban lévő feltétel 
+            A do {} while(); ciklus, másnéven a hátultesztelő vagy végfeltételes ciklus, a ciklus hasonlít az előzőre, viszont itt 
+            a do kulcsszónak köszönhetően minden utasítás lefut a ciklusban, aztán következik a while()-ban lévő feltétel 
             kiértékelése, ha ez hamis akkor nem fut le újra a ciklus, egyébként igaz érték esetén újra lefuttatja a benne lévő utasításokat.
         </para>
         <para>
-            A <command>foreach</command> ciklus, amely olyan mint a for() ciklus, viszont ebben nem lehet megadni a lépésközt, és a feltételt, 
+            A foreach ciklus, amely olyan mint a for() ciklus, viszont ebben nem lehet megadni a lépésközt, és a feltételt, 
             tahát a ciklus a megadott struktura minden elemén végighalad.
         </para>
         <para>
@@ -402,7 +402,7 @@
             Egy interfész osztálynál az öröklést a következő formula alapján hajtjuk végre az implements kulcsszóval:
         </para>
         <para>
-            <command> class az_Osztályunk_Neve implements az_Osztály_Neve_Amelyből_Örökíteni_Akarunk </command>
+             class az_Osztályunk_Neve implements az_Osztály_Neve_Amelyből_Örökíteni_Akarunk 
         </para>
         <para>
             Több interfészt is örökölhet egy osztály, így elkülönítve különböző tulajdonságú osztályokat.
@@ -431,7 +431,7 @@
             Egy abstract osztálynál az öröklést a következő formula alapján hajtjuk végre az extends kulcsszóval:
         </para>
         <para>
-            <command> class az_Osztályunk_Neve extends az_Osztály_Neve_Amelyből_Örökíteni_Akarunk </command>
+             class az_Osztályunk_Neve extends az_Osztály_Neve_Amelyből_Örökíteni_Akarunk 
         </para>
 
 
